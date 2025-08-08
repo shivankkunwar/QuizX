@@ -1,13 +1,59 @@
 'use client'
+import { useUserId } from "@/hooks/useUserId";
+import { createQuiz } from "@/lib/quizService";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { error } from "console";
 import { StepForward } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+const autoResize = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const el = e.target;
+    el.style.height = 'auto';
+    el.style.height = `${el.scrollHeight}px`;
+}
 
 export default function QuizInput() {
 
-    const autoResize = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-        const el = e.target;
-        el.style.height = 'auto';
-        el.style.height = `${el.scrollHeight}px`;
+
+    const [topic, setTopic] = useState("");
+    const [geminiKey, setGeminiKey] = useState('');
+    const [useGemini, setUseGemini] = useState(false);
+
+
+    const router = useRouter();
+    const queryClient = useQueryClient();
+    const userId = useUserId();
+
+
+    const createQuizMutation = useMutation({
+        mutationFn: createQuiz,
+        onSuccess: (data) => {
+            router.push(`/quiz/${data.id}`);
+            queryClient.setQueryData(['quiz', data.id], data);
+        },
+        onError: (error)=>{
+            console.error(`Quiz creation failed `, error);
+            alert(`Failed to create quiz  ${error.message}`);
+        }
+    })
+
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+
+        if(!topic.trim())return;
+
+        if(useGemini && !geminiKey.trim()){
+            alert("Add a gemini API Key");
+            return;
+        }
+
+        createQuizMutation.mutate({
+            topic: topic.trim(),
+            geminiKey: useGemini ? geminiKey.trim() : undefined,
+            userId: userId ?? undefined
+        })
     }
+
 
 
 

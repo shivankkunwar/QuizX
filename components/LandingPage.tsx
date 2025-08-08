@@ -4,12 +4,13 @@ import LPactionButtons from "./LPactionButtons";
 
 export default function LandingPage() {
     return (
-      <div className="min-h-[100dvh] bg-gray-50 flex flex-col">
-  
-        
+      <div className="min-h-[100dvh] relative flex flex-col isolate overflow-hidden">
+          <div className="hero-background" aria-hidden="true">
+            <div className="hero-lights" />
+          </div>
+
         <div className="flex-[0.6]" />
-  
-       
+
         <div className="text-center px-4">
           <header className="mb-8">
             <h1 className="text-4xl md:text-6xl font-bold text-gray-800">
