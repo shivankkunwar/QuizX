@@ -64,9 +64,19 @@ export default function QuizInput() {
                 placeholder="What do you want to quiz"
                 className="focus:border-transparent resize-none  overflow-y-scroll  min-h-10  focus:outline-none p-2 w-full max-h-[200px] bg-transparent mr-6"
                 onInput={autoResize}
-
+                onChange={(e)=>setTopic(e.target.value)}
+                disabled={createQuizMutation.isPending }
             />
-            <StepForward className="w-4 h-4" />
-        </div>
+            <button  onClick={handleSubmit} disabled={!topic.trim() || createQuizMutation.isPending}
+          className="  py-3 px-6 rounded-lg font-medium text-lg hover:from-blue-700 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 flex items-center justify-center space-x-2"
+      >
+
+            {
+                 <StepForward className="w-4 h-4"   />
+            }
+           
+            </button>
+          
+        </div> 
     )
 }
