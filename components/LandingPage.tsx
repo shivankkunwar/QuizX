@@ -2,6 +2,7 @@
 import QuizInput from "./OuizInput";
 import LPactionButtons from "./LPactionButtons";
 import HistorySection from "./HistorySection";
+import BackToHero from "./BackToHero";
 
 export default function LandingPage() {
   return (
@@ -11,7 +12,7 @@ export default function LandingPage() {
        <div className="hero-lights w-full h-full" />
       </div>
 
-      <section className="min-h-[100svh] relative flex flex-col isolate">
+      <section  id="hero-section" className="min-h-[100svh] relative flex flex-col isolate">
        
      
         <div className="flex-[0.6]" />
@@ -25,17 +26,18 @@ export default function LandingPage() {
               </span>
             </h1>
           </header>
-
+          <div id="hero-sentinel" className="h-px w-px self-center" />
           <QuizInput />
         </div>
 
         <div className="flex-1" />
         <LPactionButtons />
-
+        
       </section>
       <section id="history-section" className="py-16">
         <HistorySection />
       </section>
+      <BackToHero />
     </main>
 
   );
