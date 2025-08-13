@@ -179,7 +179,7 @@ body {
   - Hidden in dark mode
 */
 .hero-background {
-  position: absolute;
+  position: fixed;
   inset: 0;
   z-index: -1; /* container uses isolate, so this stays behind content */
   pointer-events: none;
@@ -201,7 +201,7 @@ body {
       var(--hero-top) 72%,
       var(--hero-top) 100%
     );
-  transform: translateY(12%);
+  transform: translateY(40%);
   opacity: 0;
   animation: hero-rise 14s cubic-bezier(0.16, 1, 0.3, 1) 0.2s forwards;
   will-change: transform, opacity;

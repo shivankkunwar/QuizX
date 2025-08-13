@@ -62,13 +62,13 @@ export default function QuizInput() {
             <textarea
                 rows={1}
                 placeholder="What do you want to quiz"
-                className="focus:border-transparent resize-none  overflow-y-scroll  min-h-10  focus:outline-none p-2 w-full max-h-[200px] bg-transparent mr-6"
+                className="focus:border-transparent resize-none  overflow-y-scroll  min-h-10  focus:outline-none p-2 w-full max-h-[200px] bg-transparent  md:mr-6 "
                 onInput={autoResize}
                 onChange={(e)=>setTopic(e.target.value)}
                 disabled={createQuizMutation.isPending }
             />
             <button  onClick={handleSubmit} disabled={!topic.trim() || createQuizMutation.isPending}
-          className="  py-3 px-6 rounded-lg font-medium text-lg hover:from-blue-700 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 flex items-center justify-center space-x-2"
+          className="  py-3 px-2 rounded-lg font-medium text-lg hover:from-blue-700 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 flex items-center justify-center space-x-2"
       >
 
             {

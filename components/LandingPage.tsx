@@ -1,14 +1,19 @@
 
 import QuizInput from "./OuizInput";
 import LPactionButtons from "./LPactionButtons";
+import HistorySection from "./HistorySection";
 
 export default function LandingPage() {
-    return (
-      <div className="min-h-[100dvh] relative flex flex-col isolate overflow-hidden">
-          <div className="hero-background" aria-hidden="true">
-            <div className="hero-lights" />
-          </div>
+  return (
+    <main className="relative">
+       <div className="hero-background fixed inset-0 -z-10 pointer-events-none" 
+     style={{ height: '150vh' }} aria-hidden="true">
+       <div className="hero-lights w-full h-full" />
+      </div>
 
+      <section className="min-h-[100svh] relative flex flex-col isolate">
+       
+     
         <div className="flex-[0.6]" />
 
         <div className="text-center px-4">
@@ -20,13 +25,18 @@ export default function LandingPage() {
               </span>
             </h1>
           </header>
-  
+
           <QuizInput />
         </div>
-     
-      <div className="flex-1" />
+
+        <div className="flex-1" />
         <LPactionButtons />
-        
-      </div>
-    );
-  }
+
+      </section>
+      <section id="history-section" className="py-16">
+        <HistorySection />
+      </section>
+    </main>
+
+  );
+}
