@@ -1,12 +1,26 @@
-
+'use client'
 import QuizInput from "./OuizInput";
 import LPactionButtons from "./LPactionButtons";
 import HistorySection from "./HistorySection";
 import BackToHero from "./BackToHero";
+import { useBYOK } from "./BYOK";
 
 export default function LandingPage() {
+  const { isBYOK, clearKey } = useBYOK();
+
+
   return (
     <main className="relative">
+      {isBYOK && (
+        <div className="fixed top-0 left-0 right-0 z-20">
+          <div className="flex items-center justify-center gap-4 bg-orange-50/90 backdrop-blur-md border-b border-orange-200 px-3 py-2 text-orange-700">
+            <span className="text-xs font-medium">Local Mode (BYOK)</span>
+            <button onClick={clearKey} className="text-xs font-semibold underline underline-offset-2">
+              Switch to Socratic AI
+            </button>
+          </div>
+        </div>
+      )}
        <div className="hero-background fixed inset-0 -z-10 pointer-events-none" 
      style={{ height: '150vh' }} aria-hidden="true">
        <div className="hero-lights w-full h-full" />
@@ -25,6 +39,13 @@ export default function LandingPage() {
                 Quiz
               </span>
             </h1>
+            {isBYOK && (
+              <div className="mt-2 flex justify-center">
+                <span className="inline-flex items-center rounded-full border border-orange-200 bg-orange-100 px-2 py-0.5 text-[10px] font-semibold text-orange-700">
+                  Local
+                </span>
+              </div>
+            )}
           </header>
           <div id="hero-sentinel" className="h-px w-px self-center" />
           <QuizInput />
@@ -34,7 +55,7 @@ export default function LandingPage() {
         <LPactionButtons />
         
       </section>
-      <section id="history-section" className="py-16">
+      <section id="history-section" className="">
         <HistorySection />
       </section>
       <BackToHero />

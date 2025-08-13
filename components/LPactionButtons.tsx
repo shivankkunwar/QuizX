@@ -1,12 +1,15 @@
 'use client'
 import { Settings, History } from "lucide-react"
+import { useBYOK } from "./BYOK";
 
 export default function LPactionButtons() {
+  const { openModal } = useBYOK();
   return (
     <div className="flex justify-center gap-8 py-6 text-[11px] md:text-xs">
       <button
         type="button"
         aria-label="Bring Your Own Key"
+        onClick={openModal}
         className="group relative inline-flex items-center gap-1.5 text-gray-800/80 hover:text-gray-900 transition-colors"
       >
         <span className="opacity-0 -translate-x-1 group-hover:opacity-60 group-hover:translate-x-0 transition-all duration-300 ease-out">[</span>
