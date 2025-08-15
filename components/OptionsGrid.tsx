@@ -1,6 +1,6 @@
 'use client';
 
-import { motion } from 'framer-motion';
+import { motion, Variants } from 'framer-motion';
 import { Check, X } from 'lucide-react';
 import { NormalizedQuestion } from '@/lib/quizLoader';
 import { getLayoutType } from '@/lib/contentDetector';
@@ -22,13 +22,13 @@ export default function OptionsGrid({ question, selectedOption, isAnswered, onSe
     return 'disabled';
   };
 
-  const optionVariants = {
+  const optionVariants: Variants = {
     default: { backgroundColor: "white", borderColor: "rgb(209 213 219)", scale: 1 },
     hover: { backgroundColor: "rgb(254 247 242)", borderColor: "rgb(251 146 60)", scale: 1.02, transition: { duration: 0.2 } },
     correct: { backgroundColor: "rgb(220 252 231)", borderColor: "rgb(34 197 94)", scale: 1.02, transition: { type: 'spring', stiffness: 300, damping: 20 } },
     incorrect: { backgroundColor: "rgb(254 226 226)", borderColor: "rgb(239 68 68)", x: [-2, 2, -2, 2, 0], transition: { duration: 0.4 } },
     disabled: { opacity: 0.5 }
-  } as const;
+  };
 
   const gridClass = {
     'grid-2x2': 'grid grid-cols-2 gap-3',
@@ -45,7 +45,8 @@ export default function OptionsGrid({ question, selectedOption, isAnswered, onSe
   return (
     <div className={gridClass}>
       {Object.entries(question.options).map(([optionId, text]) => {
-        const state = getOptionState(optionId);
+        type AnimateState = 'default' | 'correct' | 'incorrect' | 'disabled';
+        const state = getOptionState(optionId) as AnimateState;
         return (
           <motion.button
             key={optionId}
@@ -54,7 +55,7 @@ export default function OptionsGrid({ question, selectedOption, isAnswered, onSe
             className={`${optionClass} border-2 rounded-lg text-left w-full transition-all duration-200 cursor-pointer disabled:cursor-not-allowed relative`}
             variants={optionVariants}
             initial="default"
-            animate={state as keyof typeof optionVariants}
+            animate={state}
             whileHover={!isAnswered ? "hover" : undefined}
             whileTap={!isAnswered ? { scale: 0.98 } : undefined}
           >

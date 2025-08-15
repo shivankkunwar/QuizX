@@ -1,9 +1,17 @@
 import { motion } from "framer-motion";
-import { useSearchParams } from "next/navigation";
 
-export default function ResultsPage({ searchParams }: { searchParams: { score?: string; total?: string } }) {
-  const score = Number(searchParams?.score || 0);
-  const total = Number(searchParams?.total || 0);
+export default async function ResultsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ score?: string | string[]; total?: string | string[] }>
+}) {
+  const resolved = await searchParams;
+  const rawScore = resolved?.score;
+  const rawTotal = resolved?.total;
+  const scoreStr = Array.isArray(rawScore) ? rawScore[0] ?? "0" : rawScore ?? "0";
+  const totalStr = Array.isArray(rawTotal) ? rawTotal[0] ?? "0" : rawTotal ?? "0";
+  const score = Number(scoreStr);
+  const total = Number(totalStr);
   const pct = total > 0 ? Math.round((score / total) * 100) : 0;
 
   return (

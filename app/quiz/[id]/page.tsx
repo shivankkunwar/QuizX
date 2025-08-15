@@ -1,7 +1,12 @@
 import QuizScreen from "@/components/QuizScreen";
 
-export default function QuizPage({ params }: { params: { id: string } }) {
-  return <QuizScreen quizId={params.id} />;
+export default async function QuizPage({
+  params,
+}: {
+  params: Promise<{ id: string }>
+}) {
+  const { id } = await params;
+  return <QuizScreen quizId={id} />;
 }
 
 

@@ -20,11 +20,12 @@ export default function MarkdownContent({ content, className = '' }: MarkdownCon
       remarkPlugins={[remarkGfm, remarkMath]}
       rehypePlugins={[rehypeHighlight, rehypeKatex]}
       components={{
-        code: ({ node, inline, className, children, ...props }) => {
-          if (inline) {
+        code: ({ className, children, ...props }: any) => {
+          const isBlock = typeof className === 'string' && /language-/.test(className);
+          if (!isBlock) {
             return (
-              <code 
-                className="bg-orange-100 text-orange-800 px-1 py-0.5 rounded text-sm font-mono" 
+              <code
+                className="bg-orange-100 text-orange-800 px-1 py-0.5 rounded text-sm font-mono"
                 {...props}
               >
                 {children}
@@ -32,8 +33,8 @@ export default function MarkdownContent({ content, className = '' }: MarkdownCon
             );
           }
           return (
-            <code 
-              className={`${className} block overflow-x-auto`} 
+            <code
+              className={`${className} block overflow-x-auto`}
               {...props}
             >
               {children}
