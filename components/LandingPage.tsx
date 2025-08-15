@@ -55,7 +55,7 @@ export default function LandingPage() {
         <LPactionButtons />
         
       </section>
-      <section id="history-section" className="">
+      <section id="history-section" className="/">
         <HistorySection />
       </section>
       <BackToHero />
