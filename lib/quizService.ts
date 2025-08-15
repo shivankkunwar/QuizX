@@ -20,7 +20,7 @@ export interface QuizResponse {
 export async function createQuiz({ topic, geminiKey, userId, difficulty }: QuizRequest): Promise<QuizResponse> {
     if (geminiKey) {
         console.log('Creating quiz with Gemini API for topic:', topic);
-        const quiz = await callGeminiAPI(topic, geminiKey);
+        const quiz = await callGeminiAPI(topic, geminiKey, difficulty);
         console.log('Gemini API returned quiz:', quiz);
         
         // BYOK strict-local: do NOT hit backend in BYOK mode
@@ -54,8 +54,11 @@ export async function createQuiz({ topic, geminiKey, userId, difficulty }: QuizR
     }
 }
 
-async function callGeminiAPI(topic: string, apiKey: string) {
+async function callGeminiAPI(topic: string, apiKey: string, difficulty?: number) {
     const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+    const difficultyTier = typeof difficulty === 'number'
+        ? (difficulty < 1.3 ? 'beginner' : difficulty < 1.7 ? 'intermediate' : 'advanced')
+        : 'intermediate';
     const payload = {
         contents: [
             {
@@ -71,6 +74,7 @@ REQUIREMENTS:
 - Include clear explanations for correct answers
 - Ensure accuracy and educational value
 - Progressive difficulty (easier to harder)
+ - Overall difficulty target: ${difficulty?.toFixed(1) ?? '1.4'}x (${difficultyTier}). Adjust depth, distractor subtlety, and required reasoning accordingly.
 
 RESPONSE FORMAT (valid JSON only, no markdown fences, no extra text):
 {

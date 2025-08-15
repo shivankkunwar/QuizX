@@ -4,8 +4,11 @@ import { useUserId } from "@/hooks/useUserId";
 import { fetchHistory, HistoryItem } from "@/lib/api";
 import { groupByDate } from "@/lib/date";
 import { mergeRemoteWithLocal } from "@/lib/history-merge";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import HistoryItemCard from "./HistoryItemCard";
+import { useRouter } from "next/navigation";
+import { getLocalQuizzes } from "@/lib/localstorage";
+import { normalizeQuizData } from "@/lib/quizLoader";
 // import { MOCK_HISTORY } from "@/lib/mockHistory";
 
 function SkeletonRow() {
@@ -23,6 +26,8 @@ function SkeletonRow() {
 
 export default function HistorySection() {
   const userId = useUserId();
+  const router = useRouter();
+  const queryClient = useQueryClient();
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ['history', userId],
@@ -99,11 +104,21 @@ export default function HistorySection() {
                     totalQuestions={it.totalQuestions}
                     isLocal={(it as any).isLocal}
                     onReview={() => {
-                      // use Next router client-side; keep SSR safety
-                      if (typeof window !== 'undefined') {
-                        window.history.pushState({}, '', `/quiz/${it.id}`);
-                        window.dispatchEvent(new PopStateEvent('popstate'));
-                      }
+                      try {
+                        const locals = getLocalQuizzes();
+                        const found = locals.find(q => q.id === it.id);
+                        if (found) {
+                          const normalized = normalizeQuizData({
+                            id: found.id,
+                            title: found.topic,
+                            json: JSON.stringify(found.quiz),
+                            provider: found.provider,
+                            isLocal: true,
+                          });
+                          queryClient.setQueryData(["quiz", it.id], normalized);
+                        }
+                      } catch {}
+                      router.push(`/quiz/${it.id}`);
                     }}
                   />
                 ))}
