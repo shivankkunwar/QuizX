@@ -40,14 +40,29 @@ export default function MarkdownContent({ content, className = '' }: MarkdownCon
             </code>
           );
         },
-        pre: ({ children, ...props }) => (
-          <pre 
-            className="bg-stone-800 text-white p-4 rounded-lg overflow-x-auto border border-orange-200 my-2"
-            {...props}
-          >
-            {children}
-          </pre>
-        ),
+        pre: ({ children, ...props }) => {
+          const codeText = (Array.isArray((children as any)?.props?.children) ? (children as any).props.children.join('') : (children as any)?.props?.children) || '';
+          const handleCopy = async () => {
+            try { await navigator.clipboard.writeText(codeText); } catch {}
+          };
+          return (
+            <div className="relative group my-2">
+              <pre 
+                className="bg-stone-800 text-white p-4 rounded-lg overflow-x-auto border border-orange-200"
+                {...props}
+              >
+                {children}
+              </pre>
+              <button
+                type="button"
+                onClick={handleCopy}
+                className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity text-xs px-2 py-1 rounded bg-white/90 text-stone-800 border border-stone-200"
+              >
+                Copy
+              </button>
+            </div>
+          );
+        },
         strong: ({ children, ...props }) => (
           <strong className="text-orange-700 font-semibold" {...props}>
             {children}

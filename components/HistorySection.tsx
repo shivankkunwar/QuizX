@@ -6,7 +6,7 @@ import { groupByDate } from "@/lib/date";
 import { mergeRemoteWithLocal } from "@/lib/history-merge";
 import { useQuery } from "@tanstack/react-query";
 import HistoryItemCard from "./HistoryItemCard";
-import { MOCK_HISTORY } from "@/lib/mockHistory";
+// import { MOCK_HISTORY } from "@/lib/mockHistory";
 
 function SkeletonRow() {
   return (
@@ -26,13 +26,15 @@ export default function HistorySection() {
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ['history', userId],
+    enabled: !!userId,
     queryFn: async () => {
-      // demo mode — swap to fetch when ready
-      if (true) {
-        return mergeRemoteWithLocal(MOCK_HISTORY as unknown as HistoryItem[]);
+      try {
+        const remote = await fetchHistory(userId || 'anon');
+        return mergeRemoteWithLocal(remote);
+      } catch (e) {
+        // On network issues, gracefully fall back to just local quizzes
+        return mergeRemoteWithLocal([] as HistoryItem[]);
       }
-      const remote = await fetchHistory(userId || 'anon');
-      return mergeRemoteWithLocal(remote);
     }
   });
 
@@ -61,7 +63,17 @@ export default function HistorySection() {
 
       {/* Empty */}
       {!isLoading && !isError && data && data.length === 0 && (
-        <p className="text-center text-stone-500">No quizzes yet — create your first above.</p>
+        <div className="max-w-md mx-auto text-center rounded-2xl border border-orange-200 bg-orange-50/60 p-6">
+          <h3 className="text-sm font-semibold text-stone-800 mb-2">You're all set</h3>
+          <p className="text-sm text-stone-600 mb-4">Your quizzes will appear here. Start by entering a topic above.</p>
+          <button
+            type="button"
+            onClick={() => document.getElementById('hero-section')?.scrollIntoView({ behavior: 'smooth' })}
+            className="inline-flex items-center justify-center rounded-lg border border-orange-200 bg-white px-4 py-2 text-sm font-medium text-stone-700 hover:bg-orange-50"
+          >
+            Create your first quiz
+          </button>
+        </div>
       )}
 
       {/* Content */}
@@ -85,8 +97,13 @@ export default function HistorySection() {
                     topic={(it as any).title || it.topic}
                     score={it.score}
                     totalQuestions={it.totalQuestions}
+                    isLocal={(it as any).isLocal}
                     onReview={() => {
-                      window.location.href = `/quiz/${it.id}`;
+                      // use Next router client-side; keep SSR safety
+                      if (typeof window !== 'undefined') {
+                        window.history.pushState({}, '', `/quiz/${it.id}`);
+                        window.dispatchEvent(new PopStateEvent('popstate'));
+                      }
                     }}
                   />
                 ))}

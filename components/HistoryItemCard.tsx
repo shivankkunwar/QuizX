@@ -3,11 +3,13 @@ export default function HistoryItem({
   score,
   totalQuestions,
   onReview,
+  isLocal
 }: {
   topic: string;
   score?: number;
   totalQuestions?: number;
   onReview?: () => void;
+  isLocal?: boolean;
 }) {
   return (
     <div className="flex items-center gap-4 p-4 rounded-xl border bg-white/70 backdrop-blur-sm border-orange-200 shadow-sm hover:shadow-md transition-shadow">
@@ -28,6 +30,9 @@ export default function HistoryItem({
         )}
       </div>
 
+      {isLocal && (
+        <span className="mr-2 inline-flex items-center rounded-full border border-orange-200 bg-orange-50 px-2 py-0.5 text-[10px] font-semibold text-orange-700">Local</span>
+      )}
       <button
         type="button"
         onClick={onReview}

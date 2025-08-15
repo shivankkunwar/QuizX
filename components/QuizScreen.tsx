@@ -50,6 +50,12 @@ export default function QuizScreen({ quizId }: QuizScreenProps) {
         const question = quiz.questions[parseInt(qIndex, 10)];
         return answer === question.correct ? acc + 1 : acc;
       }, 0);
+      // Try saving last score for backend quizzes; ignore errors
+      fetch(`/api/quizzes/${quizId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', 'x-user-id': userId || 'anonymous' },
+        body: JSON.stringify({ score })
+      }).catch(() => {});
       router.push(`/quiz/${quizId}/results?score=${score}&total=${quiz.questions.length}`);
     }
   };

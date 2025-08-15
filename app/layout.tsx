@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import React from "react";
 import { Providers } from "./providers";
+import UserMenu from "@/components/UserMenu";
 
 const inter = Inter({
   variable: "--font-sans",
@@ -23,7 +24,11 @@ export default function RootLayout({
     <html lang="en" className="scroll-smooth">
       <body className={`${inter.variable} antialiased motion-ok`}>
         <Providers>
-
+          <UserMenu />
+          {/* global hero background on every page */}
+          <div className="hero-background fixed inset-0 -z-10 pointer-events-none" aria-hidden="true">
+            <div className="hero-lights w-full h-full" />
+          </div>
           {children}
         </Providers>
       </body>

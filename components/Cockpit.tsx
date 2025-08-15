@@ -57,8 +57,17 @@ export default function Cockpit({ initialTopic }: { initialTopic: string }) {
     setSelected((prev) => prev.includes(s) ? prev.filter(x => x !== s) : [...prev, s]);
   };
 
+  // Inline custom focus input (shown even if no suggestions) to reduce whitespace
+  const [customFocus, setCustomFocus] = useState('');
+  const addCustomFocus = () => {
+    const val = customFocus.trim();
+    if (!val) return;
+    setSelected((prev) => Array.from(new Set([...prev, val])));
+    setCustomFocus('');
+  };
+
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-transparent">
       <div className="max-w-2xl mx-auto px-4 py-8">
         <header className="mb-6">
           <h1 className="text-2xl font-semibold text-stone-800 truncate">{topicNorm || "Untitled Topic"}</h1>
@@ -126,6 +135,34 @@ export default function Cockpit({ initialTopic }: { initialTopic: string }) {
             className="w-full accent-orange-600"
           />
           <p className="text-[11px] text-stone-500 mt-2">Higher difficulty increases depth and trickiness.</p>
+          <div className="mt-3">
+            <div className="flex items-center gap-2">
+              <input
+                value={customFocus}
+                onChange={(e) => setCustomFocus(e.target.value)}
+                onKeyDown={(e) => { if (e.key === 'Enter') addCustomFocus(); }}
+                placeholder="Add a custom focus (e.g., arrays, time complexity)"
+                className="flex-1 rounded-lg border border-stone-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-300"
+              />
+              <button
+                type="button"
+                onClick={addCustomFocus}
+                className="px-3 py-2 rounded-lg border border-orange-200 bg-white text-stone-800 text-sm hover:bg-orange-50"
+              >
+                Add
+              </button>
+            </div>
+            {selected.length > 0 && (
+              <div className="mt-2 flex flex-wrap gap-2">
+                {selected.map(s => (
+                  <span key={s} className="inline-flex items-center gap-2 rounded-full border border-orange-200 bg-orange-50 px-3 py-1 text-xs text-orange-800">
+                    {s}
+                    <button onClick={() => toggle(s)} className="text-stone-500 hover:text-stone-700">×</button>
+                  </span>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Start CTA */}
@@ -133,7 +170,7 @@ export default function Cockpit({ initialTopic }: { initialTopic: string }) {
           <button
             type="button"
             onClick={() => router.push("/#hero-section")}
-            className="text-sm text-stone-600 hover:underline"
+            className="text-sm text-stone-700 hover:underline"
           >
             Back
           </button>
@@ -153,7 +190,7 @@ export default function Cockpit({ initialTopic }: { initialTopic: string }) {
               });
             }}
             disabled={!topicNorm || startMutation.isPending}
-            className="px-5 py-2 rounded-lg bg-orange-600 text-white text-sm font-semibold hover:bg-orange-700 disabled:opacity-50"
+            className="px-5 py-2 rounded-lg border border-orange-200 bg-white text-stone-800 text-sm font-semibold hover:bg-orange-50 disabled:opacity-50"
           >
             {startMutation.isPending ? "Starting…" : "Start Quiz"}
           </button>
