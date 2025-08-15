@@ -2,10 +2,11 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft } from 'lucide-react';
-import { loadQuiz } from '@/lib/quizLoader';
+import { loadQuiz, normalizeQuizData } from '@/lib/quizLoader';
+import { getLocalQuizzes } from '@/lib/localstorage';
 import { useUserId } from '@/hooks/useUserId';
 import MarkdownContent from './MarkdownContent';
 import OptionsGrid from './OptionsGrid';
@@ -18,19 +19,40 @@ interface QuizScreenProps {
 export default function QuizScreen({ quizId }: QuizScreenProps) {
   const router = useRouter();
   const userId = useUserId();
+  const queryClient = useQueryClient();
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const [isAnswered, setIsAnswered] = useState(false);
   const [answers, setAnswers] = useState<Record<number, string>>({});
 
+  const initialFromCache = queryClient.getQueryData<any>(['quiz', quizId]);
+  const initialFromLocal = (() => {
+    try {
+      const list = getLocalQuizzes();
+      const found = list.find(q => q.id === quizId);
+      if (found) {
+        return normalizeQuizData({
+          id: found.id,
+          title: found.topic,
+          json: JSON.stringify(found.quiz),
+          provider: found.provider,
+          isLocal: true
+        });
+      }
+    } catch {}
+    return undefined;
+  })();
+
   const { data: quiz, isLoading, error } = useQuery({
     queryKey: ['quiz', quizId],
     queryFn: () => loadQuiz(quizId, userId || 'anonymous'),
     staleTime: 5 * 60 * 1000,
+    initialData: (initialFromCache as any) ?? (initialFromLocal as any),
   });
 
-  const currentQuestion = quiz?.questions?.[currentQuestionIndex];
-  const progress = quiz ? ((currentQuestionIndex + 1) / quiz.questions.length) * 100 : 0;
+  const safeQuestions = Array.isArray(quiz?.questions) ? quiz!.questions : [];
+  const currentQuestion = safeQuestions[currentQuestionIndex];
+  const progress = safeQuestions.length > 0 ? ((currentQuestionIndex + 1) / safeQuestions.length) * 100 : 0;
 
   const handleOptionSelect = (optionId: string) => {
     if (isAnswered) return;
@@ -40,14 +62,14 @@ export default function QuizScreen({ quizId }: QuizScreenProps) {
   };
 
   const handleNextQuestion = () => {
-    if (!quiz) return;
-    if (currentQuestionIndex < quiz.questions.length - 1) {
+    if (!safeQuestions.length) return;
+    if (currentQuestionIndex < safeQuestions.length - 1) {
       setCurrentQuestionIndex(prev => prev + 1);
       setSelectedOption(null);
       setIsAnswered(false);
     } else {
       const score = Object.entries(answers).reduce((acc, [qIndex, answer]) => {
-        const question = quiz.questions[parseInt(qIndex, 10)];
+        const question = safeQuestions[parseInt(qIndex, 10)];
         return answer === question.correct ? acc + 1 : acc;
       }, 0);
       // Try saving last score for backend quizzes; ignore errors
@@ -56,7 +78,7 @@ export default function QuizScreen({ quizId }: QuizScreenProps) {
         headers: { 'Content-Type': 'application/json', 'x-user-id': userId || 'anonymous' },
         body: JSON.stringify({ score })
       }).catch(() => {});
-      router.push(`/quiz/${quizId}/results?score=${score}&total=${quiz.questions.length}`);
+      router.push(`/quiz/${quizId}/results?score=${score}&total=${safeQuestions.length}`);
     }
   };
 
@@ -71,13 +93,13 @@ export default function QuizScreen({ quizId }: QuizScreenProps) {
     );
   }
 
-  if (error || !quiz) {
+  if (error || !quiz || !Array.isArray(quiz.questions) || quiz.questions.length === 0) {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-center max-w-md mx-auto px-4">
           <div className="text-6xl mb-4">😕</div>
-          <h2 className="text-xl font-semibold text-stone-800 mb-2">Quiz not found</h2>
-          <p className="text-stone-600 mb-6">This quiz might have been deleted or you don't have access to it.</p>
+          <h2 className="text-xl font-semibold text-stone-800 mb-2">Quiz not ready</h2>
+          <p className="text-stone-600 mb-6">We couldn't load questions yet. Please go back and try again.</p>
           <button
             onClick={() => router.push('/')}
             className="px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors"
@@ -102,7 +124,7 @@ export default function QuizScreen({ quizId }: QuizScreenProps) {
             </button>
             <div className="flex-1">
               <h1 className="font-semibold text-stone-800 truncate">{quiz.title}</h1>
-              <p className="text-sm text-stone-500">Question {currentQuestionIndex + 1} of {quiz.questions.length}</p>
+              <p className="text-sm text-stone-500">Question {currentQuestionIndex + 1} of {safeQuestions.length}</p>
             </div>
           </div>
           <div className="w-full bg-stone-200 rounded-full h-2">
@@ -148,7 +170,7 @@ export default function QuizScreen({ quizId }: QuizScreenProps) {
           topic={quiz.title}
           isVisible={isAnswered}
           onNext={handleNextQuestion}
-          isLastQuestion={currentQuestionIndex === quiz.questions.length - 1}
+          isLastQuestion={currentQuestionIndex === safeQuestions.length - 1}
         />
       )}
     </div>

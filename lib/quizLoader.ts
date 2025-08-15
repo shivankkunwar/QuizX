@@ -44,18 +44,18 @@ export async function loadQuiz(id: string, userId: string): Promise<NormalizedQu
   return null;
 }
 
-function normalizeQuizData(raw: any): NormalizedQuiz {
-  const quizData = typeof raw.json === 'string' ? JSON.parse(raw.json) : raw.json;
+export function normalizeQuizData(raw: any): NormalizedQuiz {
+  const quizData = typeof raw.json === 'string' ? JSON.parse(raw.json) : (raw.json ?? raw.quiz ?? raw);
   return {
     id: raw.id,
     title: quizData?.title || raw.title || 'Untitled Quiz',
     description: quizData?.description,
-    questions: (quizData?.questions || []).map((q: any) => ({
-      id: q.id,
-      question: q.question,
-      options: q.options,
-      correct: q.correct,
-      explanation: q.explanation || 'No explanation provided.'
+    questions: (Array.isArray(quizData?.questions) ? quizData.questions : []).map((q: any, i: number) => ({
+      id: q?.id ?? i + 1,
+      question: String(q?.question ?? ''),
+      options: q?.options ?? { A: '', B: '', C: '', D: '' },
+      correct: q?.correct ?? 'A',
+      explanation: String(q?.explanation ?? 'No explanation provided.')
     })),
     provider: raw.provider || 'openrouter',
     isLocal: raw.isLocal || false

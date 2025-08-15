@@ -2,11 +2,8 @@
 
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import rehypeHighlight from 'rehype-highlight';
-import rehypeKatex from 'rehype-katex';
+// Remove rehype plugins that require DOMParser on the Edge/SSR path
 import remarkMath from 'remark-math';
-import 'highlight.js/styles/atom-one-dark.css';
-import 'katex/dist/katex.min.css';
 
 interface MarkdownContentProps {
   content: string;
@@ -18,7 +15,8 @@ export default function MarkdownContent({ content, className = '' }: MarkdownCon
     <ReactMarkdown
       className={className}
       remarkPlugins={[remarkGfm, remarkMath]}
-      rehypePlugins={[rehypeHighlight, rehypeKatex]}
+      // Avoid rehype plugins on Edge runtime to prevent DOMParser errors
+      rehypePlugins={[]}
       components={{
         code: ({ className, children, ...props }: any) => {
           const isBlock = typeof className === 'string' && /language-/.test(className);

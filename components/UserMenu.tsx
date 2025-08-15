@@ -44,15 +44,32 @@ export default function UserMenu() {
     setTimeout(() => setCopied(false), 1200);
   };
 
-  const handleSaveId = () => {
+  const handleSaveId = async () => {
     const val = newId.trim();
     if (!val || val.length < 6 || val.length > 50) {
       alert('Enter a valid ID (6–50 chars)');
       return;
     }
-    localStorage.setItem('quiz-user-id', val);
-    // Full reload to ensure all client code picks the new ID
-    window.location.reload();
+    try {
+      const res = await fetch('/api/auth/switch', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ id: val })
+      });
+      if (res.ok) {
+        localStorage.setItem('quiz-user-id', val);
+        window.location.reload();
+        return;
+      }
+      if (res.status === 404) {
+        alert('ID does not exist. Your current ID remains active.');
+        return;
+      }
+      alert('Server unavailable or cannot change ID right now.');
+    } catch {
+      alert('Server unavailable. Cannot change ID right now.');
+    }
   };
 
   const shortId = userId ? `${userId.slice(0, 6)}…${userId.slice(-4)}` : '—';
@@ -96,7 +113,7 @@ export default function UserMenu() {
                     className="inline-flex items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm bg-white border border-stone-200 hover:bg-stone-50 focus:outline-none focus:ring-2 focus:ring-orange-300"
                   >
                     <Pencil className="w-4 h-4 text-stone-700" />
-                    <span>Edit ID</span>
+                    <span>Sync with ID</span>
                   </button>
                   <button
                     onClick={handleCopy}
@@ -121,7 +138,7 @@ export default function UserMenu() {
                 <input
                   value={newId}
                   onChange={(e) => setNewId(e.target.value)}
-                  placeholder="Paste or enter your ID"
+                  placeholder="Paste your existing ID to sync"
                   className="w-full rounded-lg border border-stone-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-300"
                 />
                 <div className="flex items-center justify-end gap-2">

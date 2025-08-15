@@ -8,6 +8,7 @@ import { analyzeVagueness } from "@/lib/vagueness";
 import { useBYOK } from "./BYOK";
 import { useUserId } from "@/hooks/useUserId";
 import { createQuiz } from "@/lib/quizService";
+import { normalizeQuizData } from "@/lib/quizLoader";
 
 type SuggestionResult = {
   isVague: boolean;
@@ -45,8 +46,22 @@ export default function Cockpit({ initialTopic }: { initialTopic: string }) {
   const startMutation = useMutation({
     mutationFn: createQuiz,
     onSuccess: (data) => {
+      // Ensure React Query cache holds the normalized shape QuizScreen expects BEFORE navigation
+      try {
+        if ((data as any)?.quiz) {
+          const normalized = normalizeQuizData({
+            id: (data as any).id,
+            title: (data as any).quiz?.title,
+            json: JSON.stringify((data as any).quiz),
+            provider: (data as any).provider,
+            isLocal: true,
+          });
+          queryClient.setQueryData(["quiz", (data as any).id], normalized);
+        } else {
+          queryClient.setQueryData(["quiz", (data as any).id], data);
+        }
+      } catch {}
       router.push(`/quiz/${data.id}`);
-      queryClient.setQueryData(["quiz", data.id], data);
     },
     onError: (err: any) => {
       alert(`Failed to create quiz ${err?.message || ""}`);
