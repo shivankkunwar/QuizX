@@ -1,5 +1,7 @@
 import QuizScreen from "@/components/QuizScreen";
 
+export const runtime = 'edge';
+
 export default async function QuizPage({
   params,
 }: {

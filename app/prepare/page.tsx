@@ -1,5 +1,7 @@
 import Cockpit from "@/components/Cockpit";
 
+export const runtime = 'edge';
+
 export default async function PreparePage({
 	searchParams,
 }: {
