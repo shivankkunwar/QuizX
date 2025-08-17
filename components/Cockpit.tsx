@@ -9,6 +9,7 @@ import { useBYOK } from "./BYOK";
 import { useUserId } from "@/hooks/useUserId";
 import { createQuiz } from "@/lib/quizService";
 import { normalizeQuizData } from "@/lib/quizLoader";
+import { fetchUsage } from "@/lib/api";
 
 type SuggestionResult = {
   isVague: boolean;
@@ -36,6 +37,13 @@ export default function Cockpit({ initialTopic }: { initialTopic: string }) {
     enabled: !!topicNorm && !isBYOK && topicNorm.length >= 3,
     staleTime: 0,
     retry: false,
+  });
+
+  const { data: usage } = useQuery({
+    queryKey: ['usage', userId],
+    queryFn: () => fetchUsage(userId || 'anonymous'),
+    enabled: !!userId && !isBYOK,
+    staleTime: 30_000
   });
 
   const refinedTopic = useMemo(() => {
@@ -81,12 +89,16 @@ export default function Cockpit({ initialTopic }: { initialTopic: string }) {
     setCustomFocus('');
   };
 
+  const hitDailyLimit = !isBYOK && usage && usage.quiz.remaining <= 0;
+  const disableNav = isLoading || startMutation.isPending || hitDailyLimit;
+
   return (
     <div className="min-h-screen bg-transparent">
       <div className="max-w-2xl mx-auto px-4 py-8">
         <header className="mb-6">
           <h1 className="text-2xl font-semibold text-stone-800 truncate">{topicNorm || "Untitled Topic"}</h1>
           <p className="text-xs text-stone-500 mt-1">Fine‑tune your quiz for better focus.</p>
+          {/* Minimal usage moved near Start button */}
         </header>
 
         {/* Vague strip (API mode only) */}
@@ -185,10 +197,17 @@ export default function Cockpit({ initialTopic }: { initialTopic: string }) {
           <button
             type="button"
             onClick={() => router.push("/#hero-section")}
-            className="text-sm text-stone-700 hover:underline"
+            disabled={disableNav}
+            className="text-sm text-stone-700 hover:underline disabled:opacity-40 disabled:pointer-events-none"
           >
             Back
           </button>
+          <div className="flex items-center gap-2">
+          {!isBYOK && usage && (
+            <span className="text-[11px] text-stone-600">
+              {usage.quiz.remaining}/{usage.quiz.limit} left
+            </span>
+          )}
           <button
             type="button"
             onClick={() => {
@@ -204,12 +223,18 @@ export default function Cockpit({ initialTopic }: { initialTopic: string }) {
                 geminiKey: isBYOK ? byokKey.trim() : undefined,
               });
             }}
-            disabled={!topicNorm || startMutation.isPending}
-            className="px-5 py-2 rounded-lg border border-orange-200 bg-white text-stone-800 text-sm font-semibold hover:bg-orange-50 disabled:opacity-50"
+            disabled={!topicNorm || isLoading || startMutation.isPending || hitDailyLimit}
+            className="px-5 py-2 rounded-lg border border-orange-200 bg-white text-stone-800 text-sm font-semibold hover:bg-orange-50 disabled:opacity-50 disabled:pointer-events-none"
           >
-            {startMutation.isPending ? "Starting…" : "Start Quiz"}
+            {hitDailyLimit ? "Limit reached" : isLoading ? "Analyzing…" : startMutation.isPending ? "Starting…" : "Start Quiz"}
           </button>
+          </div>
         </div>
+        {!isBYOK && usage && usage.quiz.remaining <= 0 && (
+          <div className="mt-3 text-xs text-stone-600 text-center">
+            You’ve used today’s free quizzes. Add a key (Local Mode) to continue.
+          </div>
+        )}
       </div>
     </div>
   );

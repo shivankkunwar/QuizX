@@ -4,9 +4,11 @@ import LPactionButtons from "./LPactionButtons";
 import HistorySection from "./HistorySection";
 import BackToHero from "./BackToHero";
 import { useBYOK } from "./BYOK";
+// usage display moved into components where needed (QuizInput, Cockpit)
 
 export default function LandingPage() {
   const { isBYOK, clearKey } = useBYOK();
+  
 
 
   return (
@@ -21,6 +23,7 @@ export default function LandingPage() {
           </div>
         </div>
       )}
+      {/* Non-BYOK usage bar removed for a more minimal UX */}
        <div className="hero-background fixed inset-0 -z-10 pointer-events-none" 
      style={{ height: '150vh' }} aria-hidden="true">
        <div className="hero-lights w-full h-full" />

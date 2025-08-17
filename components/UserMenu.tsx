@@ -58,12 +58,15 @@ export default function UserMenu() {
         body: JSON.stringify({ id: val })
       });
       if (res.ok) {
+        // Only update localStorage if server accepted the ID
         localStorage.setItem('quiz-user-id', val);
         window.location.reload();
         return;
       }
       if (res.status === 404) {
-        alert('ID does not exist. Your current ID remains active.');
+        // ID doesn't exist - don't change anything
+        alert('This ID does not exist on the server. Your current ID remains active.\n\nNote: IDs are only created when you generate a quiz using the API mode (not BYOK).');
+        setEditing(false);
         return;
       }
       alert('Server unavailable or cannot change ID right now.');

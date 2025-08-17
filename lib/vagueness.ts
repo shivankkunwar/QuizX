@@ -1,11 +1,12 @@
 export async function analyzeVagueness(topic :string, userId: string, isBYOK:boolean){
-    const res = await fetch('/api/topic/analyze', {
+    const res = await fetch(`/api/topic/analyze`, {
         method: 'POST',
         headers:{
             'Content-Type': 'application/json',
             'x-user-id' : userId || 'anon',
             'x-byok-mode': isBYOK? 'true': 'false'
-        } ,
+        },
+        credentials: 'include', // Include cookies
         body: JSON.stringify({topic})
     })
 

@@ -1,4 +1,4 @@
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3001';
+const API_BASE_URL = process.env.NEXT_PUBLIC_BACKEND_ORIGIN || 'http://localhost:3001';
 export interface QuizRequest {
   topic: string;
   geminiKey?: string;
@@ -22,14 +22,29 @@ export interface HistoryItem {
   totalQuestions?: number;
 
 }
+
+export type UsageResponse = {
+  quiz: { used: number; limit: number; remaining: number };
+  vagueness: { used: number; limit: number; remaining: number };
+};
+
+export async function fetchUsage(userId: string): Promise<UsageResponse> {
+  const res = await fetch(`/api/usage`, {
+    headers: { 'x-user-id': userId || 'anon' },
+    credentials: 'include'
+  });
+  if (!res.ok) throw new Error('Failed to load usage');
+  return res.json();
+}
 export async function createQuiz({ topic, geminiKey, userId }: QuizRequest): Promise<QuizResponse> {
 
-  const response = await fetch(`${API_BASE_URL}/api/quizzes`, {
+  const response = await fetch(`/api/quizzes`, {
     method: 'POST',
     headers: {
       'content-type': 'application/json',
       'x-user-id': userId || 'anon'
     },
+    credentials: 'include', // Include cookies
     body: JSON.stringify({ topic })
   })
   if (!response.ok) {
@@ -42,8 +57,9 @@ export async function createQuiz({ topic, geminiKey, userId }: QuizRequest): Pro
 
 
 export async function fetchHistory(userId: string): Promise<HistoryItem[]> {
-  const res = await fetch(`${API_BASE_URL}/api/quizzes`, {
-    headers: { 'x-user-id': userId || 'anon' }
+  const res = await fetch(`/api/quizzes`, {
+    headers: { 'x-user-id': userId || 'anon' },
+    credentials: 'include' // Include cookies
   })
 
   if (!res.ok) throw new Error('Failed to load History');

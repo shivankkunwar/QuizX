@@ -51,6 +51,7 @@ export default function ExplanationDrawer({
     <>
       <motion.div
         className="fixed bottom-4 left-1/2 transform -translate-x-1/2 z-50"
+        style={{ pointerEvents: isOpen ? 'none' : 'auto' }}
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: isOpen ? 0 : 1, y: isOpen ? 10 : 0 }}
         transition={{ delay: 0.3, type: 'spring', stiffness: 300 }}
