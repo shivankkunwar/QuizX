@@ -2,7 +2,7 @@
 
 import { useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
-
+export const runtime = 'edge';
 export default function ResultsPage() {
   const params = useSearchParams();
   const scoreStr = params.get("score") ?? "0";
