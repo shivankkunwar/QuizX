@@ -36,12 +36,7 @@ export default function LandingPage() {
 
         <div className="text-center px-4">
           <header className="mb-8">
-            <h1 className="text-4xl md:text-6xl font-bold text-gray-800">
-              <span className="block">Personalized</span>
-              <span className="block underline decoration-blue-500 decoration-4 underline-offset-4">
-                Quiz
-              </span>
-            </h1>
+            <HeroTitle />
             {isBYOK && (
               <div className="mt-2 flex justify-center">
                 <span className="inline-flex items-center rounded-full border border-orange-200 bg-orange-100 px-2 py-0.5 text-[10px] font-semibold text-orange-700">
@@ -65,4 +60,30 @@ export default function LandingPage() {
     </main>
 
   );
+}
+
+import RotatingText from './RotatingText'
+
+function HeroTitle() {
+  const words = [
+    'Personalized',
+    'Adaptive',
+    'AI‑Powered',
+    'Fast',
+    'Job‑Ready',
+    'Fun',
+  ]
+  return (
+    <h1 className="text-4xl md:text-6xl font-bold text-gray-800 flex flex-row items-center justify-center gap-3 md:gap-2">
+      <RotatingText
+        texts={words}
+        intervalMs={2000}
+        className="text-gray-800"
+        wordWrapperClassName="pb-0.5 md:pb-1"
+      />
+      <span className="block text-gray-800">
+        Quiz
+      </span>
+    </h1>
+  )
 }

@@ -69,6 +69,10 @@ export default function Cockpit({ initialTopic }: { initialTopic: string }) {
           queryClient.setQueryData(["quiz", (data as any).id], data);
         }
       } catch {}
+      // Usage changes after starting a quiz; ensure counters refresh
+      try {
+        queryClient.invalidateQueries({ queryKey: ['usage', userId] });
+      } catch {}
       router.push(`/quiz/${data.id}`);
     },
     onError: (err: any) => {
@@ -196,7 +200,7 @@ export default function Cockpit({ initialTopic }: { initialTopic: string }) {
         <div className="flex items-center justify-between">
           <button
             type="button"
-            onClick={() => router.push("/#hero-section")}
+            onClick={() => { if (disableNav) return; router.push("/#hero-section"); }}
             disabled={disableNav}
             className="text-sm text-stone-700 hover:underline disabled:opacity-40 disabled:pointer-events-none"
           >
@@ -214,6 +218,9 @@ export default function Cockpit({ initialTopic }: { initialTopic: string }) {
               // Strict BYOK: never hit backend if BYOK is active; require key
               if (isBYOK && !byokKey.trim()) {
                 openModal();
+                return;
+              }
+              if (!topicNorm || isLoading || startMutation.isPending || hitDailyLimit) {
                 return;
               }
               startMutation.mutate({

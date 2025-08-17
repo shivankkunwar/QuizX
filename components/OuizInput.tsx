@@ -27,7 +27,9 @@ export default function QuizInput() {
         queryKey: ['usage', userId],
         queryFn: () => fetchUsage(userId || 'anonymous'),
         enabled: !!userId && !isBYOK,
-        staleTime: 30_000
+        staleTime: 30_000,
+        refetchOnMount: 'always',
+        refetchOnWindowFocus: true,
     });
 
 

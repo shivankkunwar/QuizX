@@ -116,7 +116,7 @@ export default function UserMenu() {
                     className="inline-flex items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm bg-white border border-stone-200 hover:bg-stone-50 focus:outline-none focus:ring-2 focus:ring-orange-300"
                   >
                     <Pencil className="w-4 h-4 text-stone-700" />
-                    <span>Sync with ID</span>
+                    <span>Sync</span>
                   </button>
                   <button
                     onClick={handleCopy}
@@ -166,7 +166,7 @@ export default function UserMenu() {
 
           <div className="flex items-center justify-between">
             <a
-              href="https://github.com/"
+              href="https://github.com/shivankkunwar/QuizX"
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-2 text-sm text-stone-700 hover:text-stone-900"

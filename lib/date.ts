@@ -1,7 +1,7 @@
 export function dateLabel(t:number){
     const d = new Date(t*1000);
     const today = new Date(); today.setHours(0,0,0,0);
-    const that = new Date(d); today.setHours(0,0,0,0);
+    const that = new Date(d); that.setHours(0,0,0,0);
 
     const diffDays = Math.floor((today.getTime() - that.getTime()) / (1000 * 60 * 60 * 24));
 
