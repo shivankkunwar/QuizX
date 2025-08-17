@@ -37,7 +37,7 @@ export default function BackToHero(){
           aria-label="Back to top"
           className="fixed bottom-6 right-6 z-40 rounded-full bg-white/70 border border-orange-400 text-white p-3 shadow-lg hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-300 transition"
         >
-          <ArrowUp className="w-5 h-5" />
+          <ArrowUp className="w-5 h-5 text-black" />
         </button>
       );
 

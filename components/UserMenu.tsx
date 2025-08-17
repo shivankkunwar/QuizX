@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useUserId } from '@/hooks/useUserId';
 import { Copy, Check, Pencil, Github, ChevronDown, User2 } from 'lucide-react';
+import { useBYOK } from './BYOK';
 
 export default function UserMenu() {
   const userId = useUserId();
@@ -76,9 +77,9 @@ export default function UserMenu() {
   };
 
   const shortId = userId ? `${userId.slice(0, 6)}…${userId.slice(-4)}` : '—';
-
+  const { isBYOK, } = useBYOK();
   return (
-    <div ref={menuRef} className="fixed top-3 right-3 z-50">
+    <div ref={menuRef} className={`fixed ${isBYOK?"top-6":"top-3"} right-3 z-50`}>
       <button
         type="button"
         onClick={() => setOpen(v => !v)}

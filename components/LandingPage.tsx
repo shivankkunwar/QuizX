@@ -74,7 +74,7 @@ function HeroTitle() {
     'Fun',
   ]
   return (
-    <h1 className="text-4xl md:text-6xl font-bold text-gray-800 flex flex-row items-center justify-center gap-3 md:gap-2">
+    <h1 className="text-4xl md:text-6xl font-bold text-gray-800 flex flex-row items-center justify-center gap-2">
       <RotatingText
         texts={words}
         intervalMs={2000}
