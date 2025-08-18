@@ -1,5 +1,7 @@
 'use client'
 
+import '../instrumentation-client'
+
 import { BYOKProvider } from "@/components/BYOK";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
