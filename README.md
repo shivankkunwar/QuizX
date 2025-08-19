@@ -2,6 +2,10 @@
 
 AI-powered, chat-based quiz app. Paste any topic and get an interactive quiz with instant feedback and guest (zero-signup) access.
 
+
+https://github.com/user-attachments/assets/298e1303-1a26-4512-9adb-c92874d557f2
+
+
 ### Tech Stack
 - Next.js 15 (App Router), React 19, TypeScript
 - Tailwind CSS 4, Framer Motion
