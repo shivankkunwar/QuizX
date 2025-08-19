@@ -6,9 +6,11 @@ import { groupByDate } from "@/lib/date";
 import { mergeRemoteWithLocal } from "@/lib/history-merge";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import HistoryItemCard from "./HistoryItemCard";
+import { createTypeformFromQuiz } from "./TypeformConnect";
 import { useRouter } from "next/navigation";
 import { getLocalQuizzes } from "@/lib/localstorage";
 import { normalizeQuizData } from "@/lib/quizLoader";
+import { fetchTypeformStatus, startTypeformConnectFlow } from "./TypeformConnect";
 // import { MOCK_HISTORY } from "@/lib/mockHistory";
 
 function SkeletonRow() {
@@ -34,7 +36,8 @@ export default function HistorySection() {
     enabled: !!userId,
     queryFn: async () => {
       try {
-        const remote = await fetchHistory(userId || 'anon');
+        if (!userId) return mergeRemoteWithLocal([] as HistoryItem[]);
+        const remote = await fetchHistory(userId);
         return mergeRemoteWithLocal(remote);
       } catch (e) {
         // On network issues, gracefully fall back to just local quizzes
@@ -119,6 +122,45 @@ export default function HistorySection() {
                         }
                       } catch {}
                       router.push(`/quiz/${it.id}`);
+                    }}
+                    onPublish={async () => {
+                      try {
+                        const st = await fetchTypeformStatus();
+                        if (!st.connected) {
+                          const res = await startTypeformConnectFlow();
+                          if (!res.connected) return;
+                        }
+                        let normalized: any | undefined;
+                        try {
+                          const locals = getLocalQuizzes();
+                          const found = locals.find(q => q.id === it.id);
+                          if (found) {
+                            normalized = normalizeQuizData({
+                              id: found.id,
+                              title: found.topic,
+                              json: JSON.stringify(found.quiz),
+                              provider: found.provider,
+                              isLocal: true,
+                            });
+                            queryClient.setQueryData(["quiz", it.id], normalized);
+                          }
+                        } catch {}
+                        if (!normalized) {
+                          if (!userId) return;
+                          const res = await fetch(`/api/quizzes/${it.id}`, { headers: { 'x-user-id': userId } });
+                          if (res.ok) {
+                            const raw = await res.json();
+                            normalized = normalizeQuizData(raw);
+                          }
+                        }
+                        if (!normalized) return alert('Could not load quiz to publish');
+                        const minimal = { title: normalized.title, description: normalized.description, questions: normalized.questions };
+                        const created = await createTypeformFromQuiz(minimal, { includeEmailField: true });
+                        if (created?.shareUrl) window.open(created.shareUrl, '_blank');
+                        else alert('Created, but no share URL');
+                      } catch (e) {
+                        alert('Publish failed. Please connect Typeform first.');
+                      }
                     }}
                   />
                 ))}

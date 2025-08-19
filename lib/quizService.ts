@@ -37,11 +37,14 @@ export async function createQuiz({ topic, geminiKey, userId, difficulty }: QuizR
         console.log('Returning local quiz:', localQuiz);
         return localQuiz;
     } else {
+        if (!userId) {
+            throw new Error('userId required');
+        }
         const response = await fetch('/api/quizzes', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'x-user-id': userId || 'anonymous'
+                'x-user-id': userId
             },
             body: JSON.stringify({ topic, difficulty })
         });

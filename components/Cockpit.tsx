@@ -32,16 +32,16 @@ export default function Cockpit({ initialTopic }: { initialTopic: string }) {
   const topicNorm = useMemo(() => topic.trim(), [topic]);
 
   const { data: vagueness, isLoading } = useQuery<SuggestionResult>({
-    queryKey: ["vagueness", topicNorm],
-    queryFn: async () => analyzeVagueness(topicNorm, userId || "anon", isBYOK),
-    enabled: !!topicNorm && !isBYOK && topicNorm.length >= 3,
+    queryKey: ["vagueness", topicNorm, userId],
+    queryFn: async () => analyzeVagueness(topicNorm, userId as string, isBYOK),
+    enabled: !!topicNorm && !!userId && !isBYOK && topicNorm.length >= 3,
     staleTime: 0,
     retry: false,
   });
 
   const { data: usage } = useQuery({
     queryKey: ['usage', userId],
-    queryFn: () => fetchUsage(userId || 'anonymous'),
+    queryFn: () => fetchUsage(userId as string),
     enabled: !!userId && !isBYOK,
     staleTime: 30_000
   });
@@ -94,7 +94,7 @@ export default function Cockpit({ initialTopic }: { initialTopic: string }) {
   };
 
   const hitDailyLimit = !isBYOK && usage && usage.quiz.remaining <= 0;
-  const disableNav = isLoading || startMutation.isPending || hitDailyLimit;
+  const disableNav = !userId || isLoading || startMutation.isPending || hitDailyLimit;
 
   return (
     <div className="min-h-screen bg-transparent">
@@ -220,7 +220,7 @@ export default function Cockpit({ initialTopic }: { initialTopic: string }) {
                 openModal();
                 return;
               }
-              if (!topicNorm || isLoading || startMutation.isPending || hitDailyLimit) {
+              if (!userId || !topicNorm || isLoading || startMutation.isPending || hitDailyLimit) {
                 return;
               }
               startMutation.mutate({
@@ -230,7 +230,7 @@ export default function Cockpit({ initialTopic }: { initialTopic: string }) {
                 geminiKey: isBYOK ? byokKey.trim() : undefined,
               });
             }}
-            disabled={!topicNorm || isLoading || startMutation.isPending || hitDailyLimit}
+            disabled={!userId || !topicNorm || isLoading || startMutation.isPending || hitDailyLimit}
             className="px-5 py-2 rounded-lg border border-orange-200 bg-white text-stone-800 text-sm font-semibold hover:bg-orange-50 disabled:opacity-50 disabled:pointer-events-none"
           >
             {hitDailyLimit ? "Limit reached" : isLoading ? "Analyzing…" : startMutation.isPending ? "Starting…" : "Start Quiz"}

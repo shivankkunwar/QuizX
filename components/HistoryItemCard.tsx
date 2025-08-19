@@ -3,12 +3,14 @@ export default function HistoryItem({
   score,
   totalQuestions,
   onReview,
+  onPublish,
   isLocal
 }: {
   topic: string;
   score?: number;
   totalQuestions?: number;
   onReview?: () => void;
+  onPublish?: () => void;
   isLocal?: boolean;
 }) {
   return (
@@ -40,6 +42,14 @@ export default function HistoryItem({
         className="px-3 py-1.5 text-xs font-semibold rounded-full bg-orange-600 text-white hover:bg-orange-700 disabled:opacity-60 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-orange-300"
       >
         Review
+      </button>
+      <button
+        type="button"
+        onClick={onPublish}
+        disabled={!onPublish}
+        className="ml-2 px-3 py-1.5 text-xs font-semibold rounded-full border border-stone-200 text-stone-700 hover:bg-stone-50 disabled:opacity-60 disabled:cursor-not-allowed focus:outline-none"
+      >
+        Publish
       </button>
     </div>
   );

@@ -25,7 +25,7 @@ export default function QuizInput() {
     const userId = useUserId();
     const { data: usage } = useQuery({
         queryKey: ['usage', userId],
-        queryFn: () => fetchUsage(userId || 'anonymous'),
+        queryFn: () => fetchUsage(userId as string),
         enabled: !!userId && !isBYOK,
         staleTime: 30_000,
         refetchOnMount: 'always',
@@ -36,6 +36,7 @@ export default function QuizInput() {
 
     const proceed = () => {
         if (!topic.trim()) return;
+        if (!userId) return;
         if (!isBYOK && usage && usage.quiz.remaining <= 0) return; // blocked by daily limit
         if (isBYOK && !byokKey.trim()) { openModal(); return; }
         const q = new URLSearchParams({ topic: topic.trim() }).toString();

@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useUserId } from '@/hooks/useUserId';
 import { Copy, Check, Pencil, Github, ChevronDown, User2 } from 'lucide-react';
 import { useBYOK } from './BYOK';
+import TypeformConnect from './TypeformConnect';
 
 export default function UserMenu() {
   const userId = useUserId();
@@ -165,7 +166,7 @@ export default function UserMenu() {
 
           <div className="border-t border-stone-200 my-2" />
 
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between mb-2">
             <a
               href="https://github.com/shivankkunwar/QuizX"
               target="_blank"
@@ -175,6 +176,12 @@ export default function UserMenu() {
               <Github className="w-4 h-4" />
               <span>GitHub Repo</span>
             </a>
+          </div>
+
+          <div className="border-t border-stone-200 my-2" />
+          <div className="mb-1">
+            <p className="text-[10px] uppercase tracking-wide text-stone-500 mb-1">Integrations</p>
+            <TypeformConnect />
           </div>
         </div>
       )}

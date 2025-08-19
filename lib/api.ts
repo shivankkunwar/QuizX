@@ -29,20 +29,22 @@ export type UsageResponse = {
 };
 
 export async function fetchUsage(userId: string): Promise<UsageResponse> {
+  if (!userId) throw new Error('userId required');
   const res = await fetch(`/api/usage`, {
-    headers: { 'x-user-id': userId || 'anon' },
+    headers: { 'x-user-id': userId },
     credentials: 'include'
   });
   if (!res.ok) throw new Error('Failed to load usage');
   return res.json();
 }
 export async function createQuiz({ topic, geminiKey, userId }: QuizRequest): Promise<QuizResponse> {
+  if (!geminiKey && !userId) throw new Error('userId required');
 
   const response = await fetch(`/api/quizzes`, {
     method: 'POST',
     headers: {
       'content-type': 'application/json',
-      'x-user-id': userId || 'anon'
+      'x-user-id': (userId as string)
     },
     credentials: 'include', // Include cookies
     body: JSON.stringify({ topic })
@@ -57,8 +59,9 @@ export async function createQuiz({ topic, geminiKey, userId }: QuizRequest): Pro
 
 
 export async function fetchHistory(userId: string): Promise<HistoryItem[]> {
+  if (!userId) throw new Error('userId required');
   const res = await fetch(`/api/quizzes`, {
-    headers: { 'x-user-id': userId || 'anon' },
+    headers: { 'x-user-id': userId },
     credentials: 'include' // Include cookies
   })
 

@@ -11,6 +11,7 @@ import { useUserId } from '@/hooks/useUserId';
 import MarkdownContent from './MarkdownContent';
 import OptionsGrid from './OptionsGrid';
 import ExplanationDrawer from './ExplanationDrawer';
+import TypeformConnect, { createTypeformFromQuiz, fetchTypeformStatus, startTypeformConnectFlow } from './TypeformConnect';
 
 interface QuizScreenProps {
   quizId: string;
@@ -45,7 +46,7 @@ export default function QuizScreen({ quizId }: QuizScreenProps) {
 
   const { data: quiz, isLoading, error } = useQuery({
     queryKey: ['quiz', quizId],
-    queryFn: () => loadQuiz(quizId, userId || 'anonymous'),
+    queryFn: () => loadQuiz(quizId, userId as string),
     staleTime: 5 * 60 * 1000,
     initialData: (initialFromCache as any) ?? (initialFromLocal as any),
   });
@@ -73,9 +74,10 @@ export default function QuizScreen({ quizId }: QuizScreenProps) {
         return answer === question.correct ? acc + 1 : acc;
       }, 0);
       // Try saving last score for backend quizzes; ignore errors
+      if (!userId) return;
       fetch(`/api/quizzes/${quizId}`, {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json', 'x-user-id': userId || 'anonymous' },
+        headers: { 'Content-Type': 'application/json', 'x-user-id': userId },
         body: JSON.stringify({ score })
       }).catch(() => {});
       router.push(`/quiz/${quizId}/results?score=${score}&total=${safeQuestions.length}`);
@@ -126,6 +128,25 @@ export default function QuizScreen({ quizId }: QuizScreenProps) {
               <h1 className="font-semibold text-stone-800 truncate">{quiz.title}</h1>
               <p className="text-sm text-stone-500">Question {currentQuestionIndex + 1} of {safeQuestions.length}</p>
             </div>
+            {/* Single button: if connected → Publish; else → Connect */}
+            <button
+              onClick={async () => {
+                const st = await fetchTypeformStatus();
+                if (!st.connected) {
+                  const res = await startTypeformConnectFlow();
+                  if (!res.connected) return;
+                }
+                try {
+                  if (!quiz) return;
+                  const minimal = { title: quiz.title, description: quiz.description, questions: quiz.questions };
+                  const created = await createTypeformFromQuiz(minimal, { includeEmailField: true });
+                  if (created?.shareUrl) window.open(created.shareUrl, '_blank');
+                } catch {}
+              }}
+              className="px-3 py-1.5 text-sm rounded-lg border border-stone-200 hover:bg-stone-50"
+            >
+              Publish
+            </button>
           </div>
           <div className="w-full bg-stone-200 rounded-full h-2">
             <motion.div

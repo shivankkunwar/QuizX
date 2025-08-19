@@ -20,7 +20,7 @@ export interface NormalizedQuiz {
 export async function loadQuiz(id: string, userId: string): Promise<NormalizedQuiz | null> {
   try {
     const res = await fetch(`/api/quizzes/${id}`, {
-      headers: { 'x-user-id': userId || 'anonymous' }
+      headers: { 'x-user-id': userId }
     });
     if (res.ok) {
       const data = await res.json();
