@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Send } from 'lucide-react';
 import { loadQuiz, normalizeQuizData } from '@/lib/quizLoader';
 import { getLocalQuizzes } from '@/lib/localstorage';
 import { useUserId } from '@/hooks/useUserId';
@@ -114,9 +114,9 @@ export default function QuizScreen({ quizId }: QuizScreenProps) {
   }
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white overflow-x-hidden">
       <header className="sticky top-0 bg-white/90 backdrop-blur-sm border-b border-stone-200 z-20">
-        <div className="max-w-4xl mx-auto px-4 py-4">
+        <div className="max-w-4xl mx-auto px-4 py-4 pr-20 md:pr-4">
           <div className="flex items-center gap-4 mb-3">
             <button
               onClick={() => router.push('/')}
@@ -143,9 +143,13 @@ export default function QuizScreen({ quizId }: QuizScreenProps) {
                   if (created?.shareUrl) window.open(created.shareUrl, '_blank');
                 } catch {}
               }}
-              className="px-3 py-1.5 text-sm rounded-lg border border-stone-200 hover:bg-stone-50"
+              aria-label="Publish"
+              className=" hidden h-9 w-9 sm:h-auto sm:w-auto p-0 sm:px-3 sm:py-1.5 text-sm rounded-full border border-stone-200 text-stone-700 hover:bg-stone-50 sm:inline-flex items-center justify-center shrink-0 sm:shrink"
             >
-              Publish
+              <span className="sm:hidden inline-flex">
+                <Send className="w-4 h-4" />
+              </span>
+              <span className="hidden sm:inline">Publish</span>
             </button>
           </div>
           <div className="w-full bg-stone-200 rounded-full h-2">
@@ -159,6 +163,29 @@ export default function QuizScreen({ quizId }: QuizScreenProps) {
         </div>
       </header>
 
+      {/* Floating Publish Button on mobile to avoid clipping/overflow when title is long */}
+      <div className="sm:hidden fixed bottom-4 right-4 z-30">
+        <button
+          aria-label="Publish"
+          onClick={async () => {
+            const st = await fetchTypeformStatus();
+            if (!st.connected) {
+              const res = await startTypeformConnectFlow();
+              if (!res.connected) return;
+            }
+            try {
+              if (!quiz) return;
+              const minimal = { title: quiz.title, description: quiz.description, questions: quiz.questions };
+              const created = await createTypeformFromQuiz(minimal, { includeEmailField: true });
+              if (created?.shareUrl) window.open(created.shareUrl, '_blank');
+            } catch {}
+          }}
+          className=" bg-white/90 py-1 px-2  rounded-2xl backdrop-blur border border-stone-200 shadow-lg flex items-center justify-center text-stone-700 hover:bg-white"
+        >
+          Publish
+        </button>
+      </div>
+
       <main className="max-w-4xl mx-auto px-4 py-8">
         <AnimatePresence mode="wait">
           {currentQuestion && (
@@ -168,6 +195,7 @@ export default function QuizScreen({ quizId }: QuizScreenProps) {
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -300 }}
               transition={{ duration: 0.4, ease: 'easeInOut' }}
+              className="w-full"
             >
               <div className="mb-8">
                 <MarkdownContent content={currentQuestion.question} className="text-xl md:text-2xl font-semibold text-stone-800 leading-relaxed" />
