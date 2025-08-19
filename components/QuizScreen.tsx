@@ -131,15 +131,24 @@ export default function QuizScreen({ quizId }: QuizScreenProps) {
             {/* Single button: if connected → Publish; else → Connect */}
             <button
               onClick={async () => {
-                const st = await fetchTypeformStatus();
+                let st = await fetchTypeformStatus();
                 if (!st.connected) {
                   const res = await startTypeformConnectFlow();
                   if (!res.connected) return;
+                  st = { connected: true } as any;
                 }
                 try {
                   if (!quiz) return;
                   const minimal = { title: quiz.title, description: quiz.description, questions: quiz.questions };
-                  const created = await createTypeformFromQuiz(minimal, { includeEmailField: true });
+                  const created = await createTypeformFromQuiz(minimal, { includeEmailField: true }).catch(async (e: any) => {
+                    const msg = String(e?.message || e);
+                    if (msg.includes('not_connected') || msg.includes('network_error')) {
+                      const res2 = await startTypeformConnectFlow();
+                      if (!res2.connected) throw e;
+                      return await createTypeformFromQuiz(minimal, { includeEmailField: true });
+                    }
+                    throw e;
+                  });
                   if (created?.shareUrl) window.open(created.shareUrl, '_blank');
                 } catch {}
               }}
@@ -163,7 +172,37 @@ export default function QuizScreen({ quizId }: QuizScreenProps) {
         </div>
       </header>
 
-      
+      {/* Floating Publish Button on mobile to avoid being hidden by title */}
+      <div className="sm:hidden fixed bottom-4 right-4 z-30">
+        <button
+          aria-label="Publish"
+          onClick={async () => {
+            let st = await fetchTypeformStatus();
+            if (!st.connected) {
+              const res = await startTypeformConnectFlow();
+              if (!res.connected) return;
+              st = { connected: true } as any;
+            }
+            try {
+              if (!quiz) return;
+              const minimal = { title: quiz.title, description: quiz.description, questions: quiz.questions };
+              const created = await createTypeformFromQuiz(minimal, { includeEmailField: true }).catch(async (e: any) => {
+                const msg = String(e?.message || e);
+                if (msg.includes('not_connected') || msg.includes('network_error')) {
+                  const res2 = await startTypeformConnectFlow();
+                  if (!res2.connected) throw e;
+                  return await createTypeformFromQuiz(minimal, { includeEmailField: true });
+                }
+                throw e;
+              });
+              if (created?.shareUrl) window.open(created.shareUrl, '_blank');
+            } catch {}
+          }}
+          className=" bg-white/90 py-1 px-2  rounded-2xl backdrop-blur border border-stone-200 shadow-lg flex items-center justify-center text-stone-700 hover:bg-white"
+        >
+          Publish
+        </button>
+      </div>
 
       <main className="max-w-4xl mx-auto px-4 py-8">
         <AnimatePresence mode="wait">

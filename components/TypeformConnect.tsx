@@ -12,7 +12,12 @@ export function getTypeformWorkerBase() {
 export async function fetchTypeformStatus() {
   const base = getTypeformWorkerBase();
   if (!base) return { connected: false } as any;
-  const r = await fetch(`${base}/status`, { credentials: 'include' });
+  let r: Response;
+  try {
+    r = await fetch(`${base}/status`, { credentials: 'include' });
+  } catch {
+    return { connected: false } as any;
+  }
   if (!r.ok) return { connected: false } as any;
   return r.json();
 }
@@ -48,15 +53,20 @@ export async function startTypeformConnectFlow(): Promise<{ connected: boolean; 
 export async function createTypeformFromQuiz(quiz: any, opts?: { includeEmailField?: boolean }) {
   const base = getTypeformWorkerBase();
   if (!base) throw new Error('Typeform service not configured');
-  const r = await fetch(`${base}/forms`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    credentials: 'include',
-    body: JSON.stringify({ quiz, includeEmailField: opts?.includeEmailField })
-  });
+  let r: Response;
+  try {
+    r = await fetch(`${base}/forms`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ quiz, includeEmailField: opts?.includeEmailField })
+    });
+  } catch (e) {
+    throw new Error('network_error');
+  }
   if (!r.ok) {
     const txt = await r.text().catch(() => '');
-    throw new Error(txt);
+    throw new Error(txt || 'bad_response');
   }
   return r.json();
 }

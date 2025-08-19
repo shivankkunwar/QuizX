@@ -125,10 +125,11 @@ export default function HistorySection() {
                     }}
                     onPublish={async () => {
                       try {
-                        const st = await fetchTypeformStatus();
+                        let st = await fetchTypeformStatus();
                         if (!st.connected) {
                           const res = await startTypeformConnectFlow();
                           if (!res.connected) return;
+                          st = { connected: true } as any;
                         }
                         let normalized: any | undefined;
                         try {
@@ -155,7 +156,15 @@ export default function HistorySection() {
                         }
                         if (!normalized) return alert('Could not load quiz to publish');
                         const minimal = { title: normalized.title, description: normalized.description, questions: normalized.questions };
-                        const created = await createTypeformFromQuiz(minimal, { includeEmailField: true });
+                        const created = await createTypeformFromQuiz(minimal, { includeEmailField: true }).catch(async (err: any) => {
+                          const msg = String(err?.message || err);
+                          if (msg.includes('not_connected') || msg.includes('network_error')) {
+                            const res2 = await startTypeformConnectFlow();
+                            if (!res2.connected) throw err;
+                            return await createTypeformFromQuiz(minimal, { includeEmailField: true });
+                          }
+                          throw err;
+                        });
                         if (created?.shareUrl) window.open(created.shareUrl, '_blank');
                         else alert('Created, but no share URL');
                       } catch (e) {
