@@ -106,7 +106,7 @@ export default function HistorySection() {
                     score={it.score}
                     totalQuestions={it.totalQuestions}
                     isLocal={(it as any).isLocal}
-                    onReview={() => {
+                    onReview={async () => {
                       try {
                         const locals = getLocalQuizzes();
                         const found = locals.find(q => q.id === it.id);
@@ -119,6 +119,13 @@ export default function HistorySection() {
                             isLocal: true,
                           });
                           queryClient.setQueryData(["quiz", it.id], normalized);
+                        } else if (userId) {
+                          const res = await fetch(`/api/quizzes/${it.id}`, { headers: { 'x-user-id': userId } });
+                          if (res.ok) {
+                            const raw = await res.json();
+                            const normalized = normalizeQuizData(raw);
+                            queryClient.setQueryData(["quiz", it.id], normalized);
+                          }
                         }
                       } catch {}
                       router.push(`/quiz/${it.id}`);

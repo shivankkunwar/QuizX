@@ -47,9 +47,21 @@ export default function QuizScreen({ quizId }: QuizScreenProps) {
   const { data: quiz, isLoading, error } = useQuery({
     queryKey: ['quiz', quizId],
     queryFn: () => loadQuiz(quizId, userId as string),
+    enabled: !!userId,
     staleTime: 5 * 60 * 1000,
     initialData: (initialFromCache as any) ?? (initialFromLocal as any),
   });
+
+  if (!userId) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-8 h-8 border-2 border-orange-600 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-stone-600">Loading quiz...</p>
+        </div>
+      </div>
+    );
+  }
 
   const safeQuestions = Array.isArray(quiz?.questions) ? quiz!.questions : [];
   const currentQuestion = safeQuestions[currentQuestionIndex];
