@@ -163,28 +163,7 @@ export default function QuizScreen({ quizId }: QuizScreenProps) {
         </div>
       </header>
 
-      {/* Floating Publish Button on mobile to avoid clipping/overflow when title is long */}
-      <div className="sm:hidden fixed bottom-4 right-4 z-30">
-        <button
-          aria-label="Publish"
-          onClick={async () => {
-            const st = await fetchTypeformStatus();
-            if (!st.connected) {
-              const res = await startTypeformConnectFlow();
-              if (!res.connected) return;
-            }
-            try {
-              if (!quiz) return;
-              const minimal = { title: quiz.title, description: quiz.description, questions: quiz.questions };
-              const created = await createTypeformFromQuiz(minimal, { includeEmailField: true });
-              if (created?.shareUrl) window.open(created.shareUrl, '_blank');
-            } catch {}
-          }}
-          className=" bg-white/90 py-1 px-2  rounded-2xl backdrop-blur border border-stone-200 shadow-lg flex items-center justify-center text-stone-700 hover:bg-white"
-        >
-          Publish
-        </button>
-      </div>
+      
 
       <main className="max-w-4xl mx-auto px-4 py-8">
         <AnimatePresence mode="wait">
