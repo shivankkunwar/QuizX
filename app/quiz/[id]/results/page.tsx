@@ -6,6 +6,8 @@ import { createTypeformFromQuiz, fetchTypeformStatus, startTypeformConnectFlow }
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { getLocalQuizzes } from "@/lib/localstorage";
 import { normalizeQuizData } from "@/lib/quizLoader";
+import PublishToTypeformModal from "@/components/PublishToTypeformModal";
+import { useState } from "react";
 export const runtime = 'edge';
 export default function ResultsPage() {
   const params = useSearchParams();
@@ -16,6 +18,8 @@ export default function ResultsPage() {
   const score = Number(scoreStr);
   const total = Number(totalStr);
   const pct = total > 0 ? Math.round((score / total) * 100) : 0;
+  const [publishOpen, setPublishOpen] = useState(false);
+  const [publishData, setPublishData] = useState<any | null>(null);
 
   return (
     <div className="min-h-screen">
@@ -72,8 +76,8 @@ export default function ResultsPage() {
                 }
                 if (!normalized) return alert('Could not load quiz to publish');
                 const minimal = { title: normalized.title, description: normalized.description, questions: normalized.questions };
-                const created = await createTypeformFromQuiz(minimal, { includeEmailField: true });
-                if (created?.shareUrl) window.open(created.shareUrl, '_blank');
+                setPublishData(minimal);
+                setPublishOpen(true);
               } catch {}
             }}
             className="px-4 py-2 rounded-lg border border-stone-200 bg-white text-stone-800 text-sm font-semibold hover:bg-stone-50"
@@ -82,6 +86,7 @@ export default function ResultsPage() {
           </button>
         </div>
       </div>
+      <PublishToTypeformModal open={publishOpen} initial={publishData} onClose={() => setPublishOpen(false)} />
     </div>
   );
 }

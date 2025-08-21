@@ -11,6 +11,8 @@ import { useRouter } from "next/navigation";
 import { getLocalQuizzes } from "@/lib/localstorage";
 import { normalizeQuizData } from "@/lib/quizLoader";
 import { fetchTypeformStatus, startTypeformConnectFlow } from "./TypeformConnect";
+import PublishToTypeformModal from "./PublishToTypeformModal";
+import { useState } from "react";
 // import { MOCK_HISTORY } from "@/lib/mockHistory";
 
 function SkeletonRow() {
@@ -30,6 +32,8 @@ export default function HistorySection() {
   const userId = useUserId();
   const router = useRouter();
   const queryClient = useQueryClient();
+  const [publishOpen, setPublishOpen] = useState(false);
+  const [publishData, setPublishData] = useState<any | null>(null);
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ['history', userId],
@@ -163,17 +167,8 @@ export default function HistorySection() {
                         }
                         if (!normalized) return alert('Could not load quiz to publish');
                         const minimal = { title: normalized.title, description: normalized.description, questions: normalized.questions };
-                        const created = await createTypeformFromQuiz(minimal, { includeEmailField: true }).catch(async (err: any) => {
-                          const msg = String(err?.message || err);
-                          if (msg.includes('not_connected') || msg.includes('network_error')) {
-                            const res2 = await startTypeformConnectFlow();
-                            if (!res2.connected) throw err;
-                            return await createTypeformFromQuiz(minimal, { includeEmailField: true });
-                          }
-                          throw err;
-                        });
-                        if (created?.shareUrl) window.open(created.shareUrl, '_blank');
-                        else alert('Created, but no share URL');
+                        setPublishData(minimal);
+                        setPublishOpen(true);
                       } catch (e) {
                         alert('Publish failed. Please connect Typeform first.');
                       }
@@ -185,6 +180,7 @@ export default function HistorySection() {
           ))}
         </div>
       )}
+      <PublishToTypeformModal open={publishOpen} initial={publishData} onClose={() => setPublishOpen(false)} />
     </section>
   );
 }

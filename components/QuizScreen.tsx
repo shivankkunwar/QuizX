@@ -12,6 +12,7 @@ import MarkdownContent from './MarkdownContent';
 import OptionsGrid from './OptionsGrid';
 import ExplanationDrawer from './ExplanationDrawer';
 import TypeformConnect, { createTypeformFromQuiz, fetchTypeformStatus, startTypeformConnectFlow } from './TypeformConnect';
+import PublishToTypeformModal from './PublishToTypeformModal';
 
 interface QuizScreenProps {
   quizId: string;
@@ -25,6 +26,8 @@ export default function QuizScreen({ quizId }: QuizScreenProps) {
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const [isAnswered, setIsAnswered] = useState(false);
   const [answers, setAnswers] = useState<Record<number, string>>({});
+  const [publishOpen, setPublishOpen] = useState(false);
+  const [publishData, setPublishData] = useState<any | null>(null);
 
   const initialFromCache = queryClient.getQueryData<any>(['quiz', quizId]);
   const initialFromLocal = (() => {
@@ -152,16 +155,8 @@ export default function QuizScreen({ quizId }: QuizScreenProps) {
                 try {
                   if (!quiz) return;
                   const minimal = { title: quiz.title, description: quiz.description, questions: quiz.questions };
-                  const created = await createTypeformFromQuiz(minimal, { includeEmailField: true }).catch(async (e: any) => {
-                    const msg = String(e?.message || e);
-                    if (msg.includes('not_connected') || msg.includes('network_error')) {
-                      const res2 = await startTypeformConnectFlow();
-                      if (!res2.connected) throw e;
-                      return await createTypeformFromQuiz(minimal, { includeEmailField: true });
-                    }
-                    throw e;
-                  });
-                  if (created?.shareUrl) window.open(created.shareUrl, '_blank');
+                  setPublishData(minimal);
+                  setPublishOpen(true);
                 } catch {}
               }}
               aria-label="Publish"
@@ -198,16 +193,8 @@ export default function QuizScreen({ quizId }: QuizScreenProps) {
             try {
               if (!quiz) return;
               const minimal = { title: quiz.title, description: quiz.description, questions: quiz.questions };
-              const created = await createTypeformFromQuiz(minimal, { includeEmailField: true }).catch(async (e: any) => {
-                const msg = String(e?.message || e);
-                if (msg.includes('not_connected') || msg.includes('network_error')) {
-                  const res2 = await startTypeformConnectFlow();
-                  if (!res2.connected) throw e;
-                  return await createTypeformFromQuiz(minimal, { includeEmailField: true });
-                }
-                throw e;
-              });
-              if (created?.shareUrl) window.open(created.shareUrl, '_blank');
+              setPublishData(minimal);
+              setPublishOpen(true);
             } catch {}
           }}
           className=" bg-white/90 py-1 px-2  rounded-2xl backdrop-blur border border-stone-200 shadow-lg flex items-center justify-center text-stone-700 hover:bg-white"
@@ -252,6 +239,7 @@ export default function QuizScreen({ quizId }: QuizScreenProps) {
           isLastQuestion={currentQuestionIndex === safeQuestions.length - 1}
         />
       )}
+      <PublishToTypeformModal open={publishOpen} initial={publishData} onClose={() => setPublishOpen(false)} />
     </div>
   );
 }
