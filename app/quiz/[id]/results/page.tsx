@@ -20,6 +20,7 @@ export default function ResultsPage() {
   const pct = total > 0 ? Math.round((score / total) * 100) : 0;
   const [publishOpen, setPublishOpen] = useState(false);
   const [publishData, setPublishData] = useState<any | null>(null);
+  const [isPreparingPublish, setIsPreparingPublish] = useState(false);
 
   return (
     <div className="min-h-screen">
@@ -56,10 +57,11 @@ export default function ResultsPage() {
           <a href="/" className="px-4 py-2 rounded-lg border border-orange-200 bg-white text-stone-800 text-sm font-semibold hover:bg-orange-50">Home</a>
           <button
             onClick={async () => {
+              setIsPreparingPublish(true);
               const st = await fetchTypeformStatus();
               if (!st.connected) {
                 const res = await startTypeformConnectFlow();
-                if (!res.connected) return;
+                if (!res.connected) { setIsPreparingPublish(false); return; }
               }
               try {
                 const id = String(route?.id || '');
@@ -74,15 +76,17 @@ export default function ResultsPage() {
                     }
                   } catch {}
                 }
-                if (!normalized) return alert('Could not load quiz to publish');
+                if (!normalized) { setIsPreparingPublish(false); return alert('Could not load quiz to publish'); }
                 const minimal = { title: normalized.title, description: normalized.description, questions: normalized.questions };
                 setPublishData(minimal);
                 setPublishOpen(true);
               } catch {}
+              finally { setIsPreparingPublish(false); }
             }}
-            className="px-4 py-2 rounded-lg border border-stone-200 bg-white text-stone-800 text-sm font-semibold hover:bg-stone-50"
+            disabled={isPreparingPublish}
+            className="px-4 py-2 rounded-lg border border-stone-200 bg-white text-stone-800 text-sm font-semibold hover:bg-stone-50 disabled:opacity-60 disabled:cursor-not-allowed"
           >
-            Publish
+            {isPreparingPublish ? 'Preparing…' : 'Publish'}
           </button>
         </div>
       </div>

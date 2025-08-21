@@ -6,7 +6,8 @@ export default function HistoryItem({
   totalQuestions,
   onReview,
   onPublish,
-  isLocal
+  isLocal,
+  isPublishing
 }: {
   topic: string;
   score?: number;
@@ -14,6 +15,7 @@ export default function HistoryItem({
   onReview?: () => void;
   onPublish?: () => void;
   isLocal?: boolean;
+  isPublishing?: boolean;
 }) {
   return (
     <div className="flex items-center gap-4 p-4 rounded-xl border bg-white/70 backdrop-blur-sm border-orange-200 shadow-sm hover:shadow-md transition-shadow">
@@ -56,12 +58,18 @@ export default function HistoryItem({
         <button
           type="button"
           onClick={onPublish}
-          disabled={!onPublish}
+          disabled={!onPublish || isPublishing}
           aria-label="Publish"
           className="h-9 w-9 sm:h-auto sm:w-auto p-0 sm:px-3 sm:py-1.5 text-xs font-medium rounded-full text-stone-700 border border-stone-200 hover:bg-stone-100 hover:text-orange-700 hover:border-orange-300 disabled:opacity-60 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-stone-300 transition-colors inline-flex items-center justify-center aspect-square sm:aspect-auto"
         >
-          <span className="sm:hidden inline-flex"><MoveUpRight className="w-4 h-4" /></span>
-          <span className="hidden sm:inline">Publish</span>
+          <span className="sm:hidden inline-flex">
+            {isPublishing ? (
+              <span className="w-4 h-4 border-2 border-stone-400 border-t-transparent rounded-full animate-spin" />
+            ) : (
+              <MoveUpRight className="w-4 h-4" />
+            )}
+          </span>
+          <span className="hidden sm:inline">{isPublishing ? 'Publishing…' : 'Publish'}</span>
         </button>
       </div>
     </div>

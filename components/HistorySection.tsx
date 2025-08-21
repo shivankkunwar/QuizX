@@ -34,6 +34,7 @@ export default function HistorySection() {
   const queryClient = useQueryClient();
   const [publishOpen, setPublishOpen] = useState(false);
   const [publishData, setPublishData] = useState<any | null>(null);
+  const [isPreparingPublish, setIsPreparingPublish] = useState<string | null>(null);
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ['history', userId],
@@ -110,6 +111,7 @@ export default function HistorySection() {
                     score={it.score}
                     totalQuestions={it.totalQuestions}
                     isLocal={(it as any).isLocal}
+                    isPublishing={isPreparingPublish === it.id}
                     onReview={async () => {
                       try {
                         const locals = getLocalQuizzes();
@@ -135,11 +137,12 @@ export default function HistorySection() {
                       router.push(`/quiz/${it.id}`);
                     }}
                     onPublish={async () => {
+                      setIsPreparingPublish(it.id);
                       try {
                         let st = await fetchTypeformStatus();
                         if (!st.connected) {
                           const res = await startTypeformConnectFlow();
-                          if (!res.connected) return;
+                          if (!res.connected) { setIsPreparingPublish(null); return; }
                           st = { connected: true } as any;
                         }
                         let normalized: any | undefined;
@@ -171,6 +174,8 @@ export default function HistorySection() {
                         setPublishOpen(true);
                       } catch (e) {
                         alert('Publish failed. Please connect Typeform first.');
+                      } finally {
+                        setIsPreparingPublish(null);
                       }
                     }}
                   />

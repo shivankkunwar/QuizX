@@ -28,6 +28,7 @@ export default function QuizScreen({ quizId }: QuizScreenProps) {
   const [answers, setAnswers] = useState<Record<number, string>>({});
   const [publishOpen, setPublishOpen] = useState(false);
   const [publishData, setPublishData] = useState<any | null>(null);
+  const [isPreparingPublish, setIsPreparingPublish] = useState(false);
 
   const initialFromCache = queryClient.getQueryData<any>(['quiz', quizId]);
   const initialFromLocal = (() => {
@@ -146,26 +147,35 @@ export default function QuizScreen({ quizId }: QuizScreenProps) {
             {/* Single button: if connected → Publish; else → Connect */}
             <button
               onClick={async () => {
+                setIsPreparingPublish(true);
                 let st = await fetchTypeformStatus();
                 if (!st.connected) {
                   const res = await startTypeformConnectFlow();
-                  if (!res.connected) return;
+                  if (!res.connected) { setIsPreparingPublish(false); return; }
                   st = { connected: true } as any;
                 }
                 try {
-                  if (!quiz) return;
+                  if (!quiz) { setIsPreparingPublish(false); return; }
                   const minimal = { title: quiz.title, description: quiz.description, questions: quiz.questions };
                   setPublishData(minimal);
                   setPublishOpen(true);
                 } catch {}
+                finally { setIsPreparingPublish(false); }
               }}
+              disabled={isPreparingPublish}
               aria-label="Publish"
-              className=" hidden h-9 w-9 sm:h-auto sm:w-auto p-0 sm:px-3 sm:py-1.5 text-sm rounded-full border border-stone-200 text-stone-700 hover:bg-stone-50 sm:inline-flex items-center justify-center shrink-0 sm:shrink"
+              className=" hidden h-9 w-9 sm:h-auto sm:w-auto p-0 sm:px-3 sm:py-1.5 text-sm rounded-full border border-stone-200 text-stone-700 hover:bg-stone-50 disabled:opacity-60 disabled:cursor-not-allowed sm:inline-flex items-center justify-center shrink-0 sm:shrink"
             >
               <span className="sm:hidden inline-flex">
-                <Send className="w-4 h-4" />
+                {isPreparingPublish ? (
+                  <span className="w-4 h-4 border-2 border-stone-400 border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  <Send className="w-4 h-4" />
+                )}
               </span>
-              <span className="hidden sm:inline">Publish</span>
+              <span className="hidden sm:inline">
+                {isPreparingPublish ? 'Preparing…' : 'Publish'}
+              </span>
             </button>
           </div>
           <div className="w-full bg-stone-200 rounded-full h-2">
@@ -184,22 +194,25 @@ export default function QuizScreen({ quizId }: QuizScreenProps) {
         <button
           aria-label="Publish"
           onClick={async () => {
+            setIsPreparingPublish(true);
             let st = await fetchTypeformStatus();
             if (!st.connected) {
               const res = await startTypeformConnectFlow();
-              if (!res.connected) return;
+              if (!res.connected) { setIsPreparingPublish(false); return; }
               st = { connected: true } as any;
             }
             try {
-              if (!quiz) return;
+              if (!quiz) { setIsPreparingPublish(false); return; }
               const minimal = { title: quiz.title, description: quiz.description, questions: quiz.questions };
               setPublishData(minimal);
               setPublishOpen(true);
             } catch {}
+            finally { setIsPreparingPublish(false); }
           }}
-          className=" bg-white/90 py-1 px-2  rounded-2xl backdrop-blur border border-stone-200 shadow-lg flex items-center justify-center text-stone-700 hover:bg-white"
+          disabled={isPreparingPublish}
+          className=" bg-white/90 py-1 px-2  rounded-2xl backdrop-blur border border-stone-200 shadow-lg flex items-center justify-center text-stone-700 hover:bg-white disabled:opacity-60 disabled:cursor-not-allowed"
         >
-          Publish
+          {isPreparingPublish ? 'Preparing…' : 'Publish'}
         </button>
       </div>
 
