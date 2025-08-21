@@ -5,20 +5,25 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { error } from "console";
 import { StepForward } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useBYOK } from "./BYOK";
 import { useQuery } from "@tanstack/react-query";
 import { fetchUsage } from "@/lib/api";
-const autoResize = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    const el = e.target;
+const resizeTextarea = (el: HTMLTextAreaElement | null) => {
+    if (!el) return;
     el.style.height = 'auto';
     el.style.height = `${el.scrollHeight}px`;
 }
 
-export default function QuizInput() {
+interface QuizInputProps {
+    prefill?: string;
+}
+
+export default function QuizInput({ prefill }: QuizInputProps) {
 
 
     const [topic, setTopic] = useState("");
+    const textareaRef = useRef<HTMLTextAreaElement>(null);
 
     const router = useRouter();
     const { isBYOK, byokKey, openModal } = useBYOK();
@@ -48,15 +53,25 @@ export default function QuizInput() {
         proceed();
     }
 
+    // Sync external prefill into local state and resize
+    useEffect(() => {
+        if (typeof prefill === 'string') {
+            setTopic(prefill);
+            requestAnimationFrame(() => resizeTextarea(textareaRef.current));
+        }
+    }, [prefill]);
+
 
 
     return (
         <div className="relative flex shadow items-center mx-auto rounded-xl w-full max-w-[80vw] md:max-w-4xl p-4 border border-gray-200  bg-white">
             <textarea
+                ref={textareaRef}
                 rows={1}
                 placeholder="What do you want to quiz"
                 className="focus:border-transparent resize-none overflow-y-scroll no-scrollbar min-h-10 focus:outline-none p-2 w-full max-h-[200px] bg-transparent md:mr-6 "
-                onInput={autoResize}
+                value={topic}
+                onInput={(e) => resizeTextarea(e.currentTarget)}
                 onChange={(e) => setTopic(e.target.value)}
                 onKeyDown={(e) => {
                     if (e.key === 'Enter' && !e.shiftKey) {
