@@ -7,11 +7,30 @@ import { useBYOK } from "./BYOK";
 import InfiniteScroller from "./Marquee";
 // usage display moved into components where needed (QuizInput, Cockpit)
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 export default function LandingPage() {
   const { isBYOK, clearKey } = useBYOK();
   const [prefill, setPrefill] = useState<string>("");
+
+  // Prevent browser scroll restoration from jumping to previous position
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const { history } = window;
+    const prev = (history as any).scrollRestoration;
+    try {
+      if ('scrollRestoration' in history) {
+        (history as any).scrollRestoration = 'manual';
+      }
+    } catch {}
+    return () => {
+      try {
+        if ('scrollRestoration' in history) {
+          (history as any).scrollRestoration = prev || 'auto';
+        }
+      } catch {}
+    };
+  }, []);
 
   // One-word tags mapped to rich prompts for the textarea
   const tagToPrompt = useMemo(() => ({
@@ -51,7 +70,7 @@ export default function LandingPage() {
 
 
   return (
-    <main className="relative">
+    <main className="relative" style={{ overflowAnchor: 'none' }}>
       {isBYOK && (
         <div className="fixed top-0 left-0 right-0 z-20">
           <div className="flex items-center justify-center gap-4 bg-orange-50/90 backdrop-blur-md border-b border-orange-200 px-3 py-2 text-orange-700">
@@ -71,7 +90,7 @@ export default function LandingPage() {
       <section  id="hero-section" className="min-h-[100svh] relative flex flex-col isolate">
        
      
-        <div className="flex-[0.6]" />
+        <div className="flex-[0.9]" />
 
         <div className="text-center px-4">
           <header className="mb-8">
@@ -85,28 +104,29 @@ export default function LandingPage() {
             )}
           </header>
           <div id="hero-sentinel" className="h-px w-px self-center" />
-         
+          
           <QuizInput prefill={prefill} />
-        </div>
-        <div className="mt-4 flex justify-center">
+          <div className="mt-4 mb-6 flex justify-center px-4">
             <InfiniteScroller speed="normal" direction="left">
               {tags.map((t) => (
                 <button
                   key={t}
                   onClick={() => onTagClick(t)}
-                  className="px-3 py-1 rounded-full text-sm border border-gray-200 bg-white/80 hover:bg-white shadow-sm transition-colors"
+                  className="px-2 py-1 text-xs sm:text-sm sm:px-3 rounded-full border border-transparent bg-transparent hover:bg-white transition-colors whitespace-nowrap touch-manipulation"
                 >
                   {t}
                 </button>
               ))}
             </InfiniteScroller>
           </div>
-
+          
+        </div>
+      
         <div className="flex-1" />
         <LPactionButtons />
         
       </section>
-      <section id="history-section" className="/">
+      <section className="/">
         <HistorySection />
       </section>
       <BackToHero />

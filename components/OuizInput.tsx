@@ -55,9 +55,10 @@ export default function QuizInput({ prefill }: QuizInputProps) {
 
     // Sync external prefill into local state and resize
     useEffect(() => {
-        if (typeof prefill === 'string') {
+        if (typeof prefill === 'string' && prefill.trim()) {
             setTopic(prefill);
-            requestAnimationFrame(() => resizeTextarea(textareaRef.current));
+            // Use setTimeout to ensure DOM update completes before resize
+            setTimeout(() => resizeTextarea(textareaRef.current), 0);
         }
     }, [prefill]);
 

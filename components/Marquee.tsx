@@ -13,6 +13,7 @@ const InfiniteScroller: React.FC<InfiniteScrollerProps> = ({
 }) => {
   const scrollerRef = useRef<HTMLDivElement>(null);
   const innerRef = useRef<HTMLDivElement>(null);
+  const [isVisible, setIsVisible] = React.useState(false);
 
   useEffect(() => {
     const scroller = scrollerRef.current;
@@ -44,22 +45,26 @@ const InfiniteScroller: React.FC<InfiniteScrollerProps> = ({
     // Set CSS variables (for duration and direction)
     scroller.style.setProperty('--_animation-duration', animationDuration);
     scroller.style.setProperty('--_animation-direction', direction === 'right' ? 'reverse' : 'forwards');
+
+    // Show marquee after setup is complete
+    setTimeout(() => setIsVisible(true), 100);
   }, [speed, direction]); // Re-run if props change
 
   return (
     <div
       ref={scrollerRef}
-      className="scroller"
+      className="scroller mx-auto max-w-xs sm:max-w-md md:max-w-lg lg:max-w-2xl"
       data-direction={direction}
       data-speed={speed}
       style={{
-        maxWidth: '600px',
+        opacity: isVisible ? 1 : 0,
+        transition: 'opacity 0.5s ease-in-out'
       }}
     >
       <div ref={innerRef} className="scroller__inner" style={{
         paddingBlock: '1rem',
         display: 'flex',
-        flexWrap: 'wrap',
+        flexWrap: 'nowrap',
         gap: '1rem',
       }}>
         {children}
@@ -67,15 +72,21 @@ const InfiniteScroller: React.FC<InfiniteScrollerProps> = ({
 
     
       <style>{`
-        .scroller[data-animated="true"] {
+        .scroller {
           overflow: hidden;
+        }
+
+        .scroller[data-animated="true"] {
           -webkit-mask: linear-gradient(90deg, transparent, white 20%, white 80%, transparent);
           mask: linear-gradient(90deg, transparent, white 20%, white 80%, transparent);
         }
 
-        .scroller[data-animated="true"] .scroller__inner {
+        .scroller .scroller__inner {
           width: max-content;
           flex-wrap: nowrap;
+        }
+
+        .scroller[data-animated="true"] .scroller__inner {
           animation: scroll var(--_animation-duration, 40s) var(--_animation-direction, forwards) linear infinite;
         }
 
