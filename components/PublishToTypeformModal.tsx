@@ -102,8 +102,8 @@ export default function PublishToTypeformModal({
             <button onClick={onClose} className="text-stone-500 hover:text-stone-700 text-sm">Close</button>
           </div>
 
-          <div className="flex flex-col md:flex-row h-[70vh]">
-            <div className="md:w-1/5 w-full border-b md:border-b-0 md:border-r border-stone-200 p-3 space-y-2">
+          <div className="flex flex-col md:flex-row h-[85vh] min-h-0">
+            <div className="md:w-1/5 w-full flex-none border-b md:border-b-0 md:border-r border-stone-200 p-3 space-y-2">
               <button onClick={handleBeautify} className="w-full text-left px-3 py-2 rounded border border-stone-200 text-sm hover:bg-stone-50">Beautify</button>
               <button onClick={handleMinify} className="w-full text-left px-3 py-2 rounded border border-stone-200 text-sm hover:bg-stone-50">Minify</button>
               <button onClick={handleReset} className="w-full text-left px-3 py-2 rounded border border-stone-200 text-sm hover:bg-stone-50">Reset to default</button>
@@ -137,11 +137,11 @@ export default function PublishToTypeformModal({
               {error && <p className="text-xs text-red-600 px-1">{error}</p>}
             </div>
 
-            <div className="md:w-4/5 w-full p-3">
+            <div className="md:w-4/5 w-full flex-1 min-h-0 p-3 overflow-hidden">
               <textarea
                 value={text}
                 onChange={(e) => setText(e.target.value)}
-                className="w-full h-full resize-none font-mono text-[12px] leading-5 bg-white border border-stone-200 rounded p-3 focus:outline-none focus:ring-2 focus:ring-orange-300"
+                className="w-full h-full resize-none overflow-auto font-mono text-[12px] leading-5 bg-white border border-stone-200 rounded p-3 focus:outline-none focus:ring-2 focus:ring-orange-300"
                 spellCheck={false}
               />
             </div>
