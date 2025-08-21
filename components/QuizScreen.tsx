@@ -190,31 +190,7 @@ export default function QuizScreen({ quizId }: QuizScreenProps) {
       </header>
 
       {/* Floating Publish Button on mobile to avoid being hidden by title */}
-      <div className="sm:hidden fixed bottom-4 right-4 z-30">
-        <button
-          aria-label="Publish"
-          onClick={async () => {
-            setIsPreparingPublish(true);
-            let st = await fetchTypeformStatus();
-            if (!st.connected) {
-              const res = await startTypeformConnectFlow();
-              if (!res.connected) { setIsPreparingPublish(false); return; }
-              st = { connected: true } as any;
-            }
-            try {
-              if (!quiz) { setIsPreparingPublish(false); return; }
-              const minimal = { title: quiz.title, description: quiz.description, questions: quiz.questions };
-              setPublishData(minimal);
-              setPublishOpen(true);
-            } catch {}
-            finally { setIsPreparingPublish(false); }
-          }}
-          disabled={isPreparingPublish}
-          className=" bg-white/90 py-1 px-2  rounded-2xl backdrop-blur border border-stone-200 shadow-lg flex items-center justify-center text-stone-700 hover:bg-white disabled:opacity-60 disabled:cursor-not-allowed"
-        >
-          {isPreparingPublish ? 'Preparing…' : 'Publish'}
-        </button>
-      </div>
+   
 
       <main className="max-w-4xl mx-auto px-4 py-8">
         <AnimatePresence mode="wait">
