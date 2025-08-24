@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { createTypeformFromQuiz } from './TypeformConnect';
 
 export default function PublishToTypeformModal({
     open,
@@ -78,6 +77,7 @@ export default function PublishToTypeformModal({
         }
         setBusy(true);
         try {
+            const { createTypeformFromQuiz } = await import('./TypeformConnect');
             const created = await createTypeformFromQuiz(payload, { includeEmailField: includeEmail });
             if (created?.shareUrl) {
                 try { window.open(created.shareUrl, '_blank'); } catch { }

@@ -4,7 +4,8 @@ import { useEffect, useRef, useState } from 'react';
 import { useUserId } from '@/hooks/useUserId';
 import { Copy, Check, Pencil, Github, ChevronDown, User2 } from 'lucide-react';
 import { useBYOK } from './BYOK';
-import TypeformConnect from './TypeformConnect';
+import dynamic from 'next/dynamic';
+const TypeformConnect = dynamic(() => import('./TypeformConnect'), { ssr: false });
 
 export default function UserMenu() {
   const userId = useUserId();

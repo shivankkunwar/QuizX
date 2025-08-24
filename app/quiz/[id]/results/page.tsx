@@ -2,11 +2,11 @@
 
 import { useParams, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
-import { createTypeformFromQuiz, fetchTypeformStatus, startTypeformConnectFlow } from "@/components/TypeformConnect";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { getLocalQuizzes } from "@/lib/localstorage";
 import { normalizeQuizData } from "@/lib/quizLoader";
-import PublishToTypeformModal from "@/components/PublishToTypeformModal";
+import dynamic from 'next/dynamic';
+const PublishToTypeformModal = dynamic(() => import("@/components/PublishToTypeformModal"), { ssr: false });
 import { useState } from "react";
 export const runtime = 'edge';
 export default function ResultsPage() {
@@ -58,6 +58,7 @@ export default function ResultsPage() {
           <button
             onClick={async () => {
               setIsPreparingPublish(true);
+              const { fetchTypeformStatus, startTypeformConnectFlow } = await import("@/components/TypeformConnect");
               const st = await fetchTypeformStatus();
               if (!st.connected) {
                 const res = await startTypeformConnectFlow();

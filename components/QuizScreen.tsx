@@ -8,11 +8,12 @@ import { ArrowLeft, Send } from 'lucide-react';
 import { loadQuiz, normalizeQuizData } from '@/lib/quizLoader';
 import { getLocalQuizzes } from '@/lib/localstorage';
 import { useUserId } from '@/hooks/useUserId';
-import MarkdownContent from './MarkdownContent';
+import dynamic from 'next/dynamic';
+const MarkdownContent = dynamic(() => import('./MarkdownContent'), { ssr: false });
 import OptionsGrid from './OptionsGrid';
-import ExplanationDrawer from './ExplanationDrawer';
-import TypeformConnect, { createTypeformFromQuiz, fetchTypeformStatus, startTypeformConnectFlow } from './TypeformConnect';
-import PublishToTypeformModal from './PublishToTypeformModal';
+const ExplanationDrawer = dynamic(() => import('./ExplanationDrawer'), { ssr: false });
+const PublishToTypeformModal = dynamic(() => import('./PublishToTypeformModal'), { ssr: false });
+// Typeform functions loaded on demand
 
 interface QuizScreenProps {
   quizId: string;
@@ -148,6 +149,7 @@ export default function QuizScreen({ quizId }: QuizScreenProps) {
             <button
               onClick={async () => {
                 setIsPreparingPublish(true);
+                const { fetchTypeformStatus, startTypeformConnectFlow } = await import('./TypeformConnect');
                 let st = await fetchTypeformStatus();
                 if (!st.connected) {
                   const res = await startTypeformConnectFlow();

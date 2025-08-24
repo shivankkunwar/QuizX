@@ -4,7 +4,8 @@ import { motion, Variants } from 'framer-motion';
 import { Check, X } from 'lucide-react';
 import { NormalizedQuestion } from '@/lib/quizLoader';
 import { getLayoutType } from '@/lib/contentDetector';
-import MarkdownContent from './MarkdownContent';
+import dynamic from 'next/dynamic';
+const MarkdownContent = dynamic(() => import('./MarkdownContent'), { ssr: false });
 
 interface OptionsGridProps {
   question: NormalizedQuestion;

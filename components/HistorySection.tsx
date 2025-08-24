@@ -6,7 +6,6 @@ import { groupByDate } from "@/lib/date";
 import { mergeRemoteWithLocal } from "@/lib/history-merge";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import HistoryItemCard from "./HistoryItemCard";
-import { createTypeformFromQuiz } from "./TypeformConnect";
 import { useRouter } from "next/navigation";
 import { getLocalQuizzes } from "@/lib/localstorage";
 import { normalizeQuizData } from "@/lib/quizLoader";
@@ -139,6 +138,7 @@ export default function HistorySection() {
                     onPublish={async () => {
                       setIsPreparingPublish(it.id);
                       try {
+                        const { fetchTypeformStatus, startTypeformConnectFlow } = await import('./TypeformConnect');
                         let st = await fetchTypeformStatus();
                         if (!st.connected) {
                           const res = await startTypeformConnectFlow();

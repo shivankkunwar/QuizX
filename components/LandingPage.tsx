@@ -1,7 +1,8 @@
 'use client'
 import QuizInput from "./OuizInput";
 import LPactionButtons from "./LPactionButtons";
-import HistorySection from "./HistorySection";
+import dynamic from 'next/dynamic'
+const HistorySection = dynamic(() => import('./HistorySection'), { ssr: false });
 import BackToHero from "./BackToHero";
 import { useBYOK } from "./BYOK";
 import InfiniteScroller from "./Marquee";
