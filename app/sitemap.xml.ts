@@ -1,3 +1,5 @@
+export const runtime = 'edge';
+
 export async function GET() {
   const base = "https://quizx-5z2.pages.dev";
   const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
