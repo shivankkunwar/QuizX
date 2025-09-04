@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { useUserId } from '@/hooks/useUserId';
-import { Copy, Check, Pencil, Github, ChevronDown, User2 } from 'lucide-react';
+import { Copy, Check, Pencil, Github, ChevronDown, User2, Linkedin, Globe } from 'lucide-react';
 import { useBYOK } from './BYOK';
 import dynamic from 'next/dynamic';
 const TypeformConnect = dynamic(() => import('./TypeformConnect'), { ssr: false });
@@ -176,6 +176,31 @@ export default function UserMenu() {
             >
               <Github className="w-4 h-4" />
               <span>GitHub Repo</span>
+            </a>
+          </div>
+
+          <div className="border-t border-stone-200 my-2" />
+
+          <div className="flex items-center gap-6 mb-2">
+            <a
+              href="https://linkedin.com/in/shivank-kunwar"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 text-sm text-stone-700 hover:text-stone-900"
+              aria-label="LinkedIn"
+            >
+              <Linkedin className="w-4 h-4" />
+              <span>LinkedIn</span>
+            </a>
+            <a
+              href="https://shvnk.in/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 text-sm text-stone-700 hover:text-stone-900"
+              aria-label="Portfolio"
+            >
+              <Globe className="w-4 h-4" />
+              <span>Portfolio</span>
             </a>
           </div>
 
