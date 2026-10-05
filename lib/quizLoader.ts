@@ -30,18 +30,12 @@ export async function loadQuiz(id: string, userId: string): Promise<NormalizedQu
     console.warn('Failed to load from backend:', e);
   }
 
-  const localQuizzes = getLocalQuizzes();
-  const localQuiz = localQuizzes.find(q => q.id === id);
-  if (localQuiz) {
-    return normalizeQuizData({
-      id: localQuiz.id,
-      title: localQuiz.topic,
-      json: JSON.stringify(localQuiz.quiz),
-      provider: localQuiz.provider,
-      isLocal: true
-    });
-  }
-  return null;
+  return getLocalQuiz(id) ?? null;
+}
+
+export function getLocalQuiz(id: string): NormalizedQuiz | undefined {
+  const q = getLocalQuizzes().find(q => q.id === id);
+  return q && normalizeQuizData({ id: q.id, title: q.topic, json: q.quiz, provider: q.provider, isLocal: true });
 }
 
 export function normalizeQuizData(raw: any): NormalizedQuiz {

@@ -13,7 +13,7 @@ const resizeTextarea = (el: HTMLTextAreaElement | null) => {
 }
 
 interface QuizInputProps {
-    prefill?: string;
+    prefill?: { text: string };
 }
 
 export default function QuizInput({ prefill }: QuizInputProps) {
@@ -52,8 +52,8 @@ export default function QuizInput({ prefill }: QuizInputProps) {
 
     // Sync external prefill into local state and resize
     useEffect(() => {
-        if (typeof prefill === 'string' && prefill.trim()) {
-            setTopic(prefill);
+        if (prefill?.text) {
+            setTopic(prefill.text);
             // Use setTimeout to ensure DOM update completes before resize
             setTimeout(() => resizeTextarea(textareaRef.current), 0);
         }

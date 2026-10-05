@@ -2,7 +2,6 @@
 
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-// Remove rehype plugins that require DOMParser on the Edge/SSR path
 import remarkMath from 'remark-math';
 
 interface MarkdownContentProps {
@@ -15,8 +14,6 @@ export default function MarkdownContent({ content, className = '' }: MarkdownCon
     <ReactMarkdown
       className={className}
       remarkPlugins={[remarkGfm, remarkMath]}
-      // Avoid rehype plugins on Edge runtime to prevent DOMParser errors
-      rehypePlugins={[]}
       components={{
         code: ({ className, children, ...props }: any) => {
           const isBlock = typeof className === 'string' && /language-/.test(className);

@@ -12,7 +12,7 @@ export function useUserId(){
             setUserId(storedId);
         }else{
             const newId = nanoid();
-            localStorage.setItem('quiz-user-id', newId);;
+            localStorage.setItem('quiz-user-id', newId);
             setUserId(newId);
         }
 

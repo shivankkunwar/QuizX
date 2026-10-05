@@ -6,69 +6,47 @@ const HistorySection = dynamic(() => import('./HistorySection'), { ssr: false })
 import BackToHero from "./BackToHero";
 import { useBYOK } from "./BYOK";
 import InfiniteScroller from "./Marquee";
-// usage display moved into components where needed (QuizInput, Cockpit)
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
+
+// One-word tags mapped to rich prompts for the textarea
+const TAG_PROMPTS: Record<string, string> = {
+  "IQ": "Quiz me to test my IQ with diverse logic, math, and pattern questions.",
+  "Math": "Create a 5-question math skills quiz covering algebra, geometry, and word problems.",
+  "History": "Quiz me on world history highlights across eras and civilizations.",
+  "Science": "Make a general science quiz spanning physics, chemistry, and biology basics.",
+  "Coding": "Generate a programming fundamentals quiz with examples and concepts.",
+  "AI": "Create a beginner-friendly AI and machine learning concepts quiz.",
+  "Geography": "Test me on world geography, capitals, landmarks, and regions.",
+  "Vocabulary": "Build a vocabulary quiz with synonyms, antonyms, and usage.",
+  "Finance": "Create a personal finance basics quiz on budgeting, saving, and investing.",
+  "Health": "Generate a health and wellness quiz covering nutrition, sleep, and exercise.",
+  "Sports": "Quiz me on global sports rules, records, and iconic moments.",
+  "Movies": "Make a film trivia quiz about directors, actors, and classics.",
+  "Music": "Create a music theory and history quiz mixing genres and icons.",
+  "Startups": "Generate a startup fundamentals quiz: PMF, MVP, GTM, and metrics.",
+  "Sales": "Build a sales skills quiz on discovery, objection handling, and closing.",
+  "Marketing": "Create a marketing basics quiz: positioning, channels, funnels, and metrics.",
+  "Design": "Make a UX/UI principles quiz: typography, layout, affordances, and heuristics.",
+  "Biology": "Generate a biology quiz: cells, genetics, evolution, and systems.",
+  "Physics": "Create a physics quiz covering mechanics, energy, and waves.",
+  "Chemistry": "Make a chemistry quiz: atoms, bonding, reactions, and stoichiometry."
+};
 
 export default function LandingPage() {
   const { isBYOK, clearKey } = useBYOK();
-  const [prefill, setPrefill] = useState<string>("");
+  const [prefill, setPrefill] = useState<{ text: string }>();
 
   // Prevent browser scroll restoration from jumping to previous position
   useEffect(() => {
-    if (typeof window === 'undefined') return;
-    const { history } = window;
-    const prev = (history as any).scrollRestoration;
-    try {
-      if ('scrollRestoration' in history) {
-        (history as any).scrollRestoration = 'manual';
-      }
-    } catch {}
-    return () => {
-      try {
-        if ('scrollRestoration' in history) {
-          (history as any).scrollRestoration = prev || 'auto';
-        }
-      } catch {}
-    };
+    history.scrollRestoration = "manual";
+    return () => { history.scrollRestoration = "auto"; };
   }, []);
 
-  // One-word tags mapped to rich prompts for the textarea
-  const tagToPrompt = useMemo(() => ({
-    "IQ": "Quiz me to test my IQ with diverse logic, math, and pattern questions.",
-    "Math": "Create a 5-question math skills quiz covering algebra, geometry, and word problems.",
-    "History": "Quiz me on world history highlights across eras and civilizations.",
-    "Science": "Make a general science quiz spanning physics, chemistry, and biology basics.",
-    "Coding": "Generate a programming fundamentals quiz with examples and concepts.",
-    "AI": "Create a beginner-friendly AI and machine learning concepts quiz.",
-    "Geography": "Test me on world geography, capitals, landmarks, and regions.",
-    "Vocabulary": "Build a vocabulary quiz with synonyms, antonyms, and usage.",
-    "Finance": "Create a personal finance basics quiz on budgeting, saving, and investing.",
-    "Health": "Generate a health and wellness quiz covering nutrition, sleep, and exercise.",
-    "Sports": "Quiz me on global sports rules, records, and iconic moments.",
-    "Movies": "Make a film trivia quiz about directors, actors, and classics.",
-    "Music": "Create a music theory and history quiz mixing genres and icons.",
-    "Startups": "Generate a startup fundamentals quiz: PMF, MVP, GTM, and metrics.",
-    "Sales": "Build a sales skills quiz on discovery, objection handling, and closing.",
-    "Marketing": "Create a marketing basics quiz: positioning, channels, funnels, and metrics.",
-    "Design": "Make a UX/UI principles quiz: typography, layout, affordances, and heuristics.",
-    "Biology": "Generate a biology quiz: cells, genetics, evolution, and systems.",
-    "Physics": "Create a physics quiz covering mechanics, energy, and waves.",
-    "Chemistry": "Make a chemistry quiz: atoms, bonding, reactions, and stoichiometry."
-  } as const), []);
-
-  const tags = useMemo(() => Object.keys(tagToPrompt), [tagToPrompt]);
-
-  const onTagClick = useCallback((tag: string) => {
-    const prompt = tagToPrompt[tag as keyof typeof tagToPrompt] || tag;
-    setPrefill(prompt);
-    // Smooth scroll focus to input
-    try {
-      document.querySelector('textarea')?.focus();
-    } catch {}
-  }, [tagToPrompt]);
-  
-
+  const onTagClick = (tag: string) => {
+    setPrefill({ text: TAG_PROMPTS[tag] }); // new object so repeat clicks refill
+    document.querySelector("textarea")?.focus();
+  };
 
   return (
     <main className="relative" style={{ overflowAnchor: 'none' }}>
@@ -108,8 +86,8 @@ export default function LandingPage() {
           
           <QuizInput prefill={prefill} />
           <div className="mt-4 mb-6 flex justify-center px-4">
-            <InfiniteScroller speed="normal" direction="left">
-              {tags.map((t) => (
+            <InfiniteScroller>
+              {Object.keys(TAG_PROMPTS).map((t) => (
                 <button
                   key={t}
                   onClick={() => onTagClick(t)}

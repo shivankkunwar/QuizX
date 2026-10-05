@@ -16,7 +16,7 @@ interface OptionsGridProps {
 
 export default function OptionsGrid({ question, selectedOption, isAnswered, onSelect }: OptionsGridProps) {
   const layoutType = getLayoutType(question.options);
-  const getOptionState = (optionId: string) => {
+  const getOptionState = (optionId: string): 'default' | 'correct' | 'incorrect' | 'disabled' => {
     if (!isAnswered) return 'default';
     if (optionId === question.correct) return 'correct';
     if (optionId === selectedOption) return 'incorrect';
@@ -51,7 +51,7 @@ export default function OptionsGrid({ question, selectedOption, isAnswered, onSe
         return (
           <motion.button
             key={optionId}
-            onClick={() => !isAnswered && onSelect(optionId)}
+            onClick={() => onSelect(optionId)}
             disabled={isAnswered}
             className={`${optionClass} border-2 rounded-lg text-left w-full transition-all duration-200 cursor-pointer disabled:cursor-not-allowed relative`}
             variants={optionVariants}

@@ -16,7 +16,7 @@ export const metadata: Metadata = {
     template: "%s · Quixz",
   },
   description: "Compact, AI-powered quiz platform for rapid learning.",
-  metadataBase: new URL("https://quizx-5z2.pages.dev"),
+  metadataBase: new URL("https://quiz.shvnk.in"),
   openGraph: {
     type: "website",
     siteName: "Quixz",

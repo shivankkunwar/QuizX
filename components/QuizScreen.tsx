@@ -5,8 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft, Send } from 'lucide-react';
-import { loadQuiz, normalizeQuizData } from '@/lib/quizLoader';
-import { getLocalQuizzes } from '@/lib/localstorage';
+import { loadQuiz, getLocalQuiz, type NormalizedQuiz } from '@/lib/quizLoader';
 import { useUserId } from '@/hooks/useUserId';
 import dynamic from 'next/dynamic';
 const MarkdownContent = dynamic(() => import('./MarkdownContent'), { ssr: false });
@@ -31,42 +30,14 @@ export default function QuizScreen({ quizId }: QuizScreenProps) {
   const [publishData, setPublishData] = useState<any | null>(null);
   const [isPreparingPublish, setIsPreparingPublish] = useState(false);
 
-  const initialFromCache = queryClient.getQueryData<any>(['quiz', quizId]);
-  const initialFromLocal = (() => {
-    try {
-      const list = getLocalQuizzes();
-      const found = list.find(q => q.id === quizId);
-      if (found) {
-        return normalizeQuizData({
-          id: found.id,
-          title: found.topic,
-          json: JSON.stringify(found.quiz),
-          provider: found.provider,
-          isLocal: true
-        });
-      }
-    } catch {}
-    return undefined;
-  })();
 
   const { data: quiz, isLoading, error } = useQuery({
     queryKey: ['quiz', quizId],
     queryFn: () => loadQuiz(quizId, userId as string),
     enabled: !!userId,
     staleTime: 5 * 60 * 1000,
-    initialData: (initialFromCache as any) ?? (initialFromLocal as any),
+    initialData: queryClient.getQueryData<NormalizedQuiz>(['quiz', quizId]) ?? getLocalQuiz(quizId),
   });
-
-  if (!userId) {
-    return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-8 h-8 border-2 border-orange-600 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-stone-600">Loading quiz...</p>
-        </div>
-      </div>
-    );
-  }
 
   const safeQuestions = Array.isArray(quiz?.questions) ? quiz!.questions : [];
   const currentQuestion = safeQuestions[currentQuestionIndex];
@@ -101,7 +72,7 @@ export default function QuizScreen({ quizId }: QuizScreenProps) {
     }
   };
 
-  if (isLoading) {
+  if (!userId || isLoading) {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-center">

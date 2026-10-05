@@ -31,16 +31,10 @@ export default function ExplanationDrawer({
     }
   }, [isVisible]);
 
-  // Close the floating "Explanation" button (popover) when drawer opens to avoid overlap
-  useEffect(() => {
-    if (isOpen) {
-      setShowBounce(false);
-    }
-  }, [isOpen]);
-
   const handleDragEnd = (event: any, info: PanInfo) => {
     const shouldOpen = info.offset.y < -50 || info.velocity.y < -500;
     setIsOpen(shouldOpen);
+    if (shouldOpen) setShowBounce(false);
   };
 
   const prompt = buildOpenWithPrompt(question, topic, selectedOption || undefined);
@@ -57,7 +51,7 @@ export default function ExplanationDrawer({
         transition={{ delay: 0.3, type: 'spring', stiffness: 300 }}
       >
         <motion.button
-          onClick={() => setIsOpen(true)}
+          onClick={() => { setIsOpen(true); setShowBounce(false); }}
           className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-full shadow-lg"
           animate={showBounce ? {
             y: [0, -8, 0, -4, 0],

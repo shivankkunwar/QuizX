@@ -37,8 +37,7 @@ export default function HistorySection() {
     enabled: !!userId,
     queryFn: async () => {
       try {
-        if (!userId) return mergeRemoteWithLocal([] as HistoryItem[]);
-        const remote = await fetchHistory(userId);
+        const remote = await fetchHistory(userId!);
         return mergeRemoteWithLocal(remote);
       } catch (e) {
         // On network issues, gracefully fall back to just local quizzes

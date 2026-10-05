@@ -96,10 +96,6 @@ export default function UserMenu() {
       {open && (
         <div
           className="mt-2 w-72 rounded-xl border border-stone-200 bg-white/95 backdrop-blur shadow-lg p-3"
-          onPointerDownCapture={(e) => {
-            // Ensure inside interactions never bubble to any global outside-closer
-            e.stopPropagation();
-          }}
         >
           <div className="mb-3">
             <p className="text-[10px] uppercase tracking-wide text-stone-500 mb-1">Your ID</p>
@@ -114,7 +110,6 @@ export default function UserMenu() {
                 </button>
                 <div className="grid grid-cols-2 gap-2 mt-2">
                   <button
-                    onPointerDown={(e) => e.stopPropagation()}
                     onClick={() => setEditing(true)}
                     className="inline-flex items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm bg-white border border-stone-200 hover:bg-stone-50 focus:outline-none focus:ring-2 focus:ring-orange-300"
                   >

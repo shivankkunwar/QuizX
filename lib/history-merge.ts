@@ -5,7 +5,7 @@ import type { HistoryItem } from "./api";
 export function mergeRemoteWithLocal(remote : HistoryItem[]){
     const local = getLocalQuizzes().map(l=>({
         id: l.id, topic: l.topic, provider: 'gemini' as const,
-        created_at: l.created_at,score: undefined, totalQuestions: undefined,
+        created_at: l.created_at,
         isLocal: true as const
     }))
 

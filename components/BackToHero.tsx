@@ -9,13 +9,7 @@ export default function BackToHero(){
     useEffect(()=>{
         const sentinel = document.getElementById('hero-sentinel');
 
-        if(!sentinel){
-            const onScroll = ()=>setVisible(window.scrollY > 300);
-            onScroll();
-            window.addEventListener('scroll', onScroll , {passive: true});
-
-            return ()=> window.removeEventListener('scroll',onScroll)
-        }
+        if(!sentinel) return;
         
         const obs = new IntersectionObserver(
             (entries) => setVisible(!entries[0].isIntersecting),
