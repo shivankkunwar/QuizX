@@ -7,12 +7,9 @@ import { mergeRemoteWithLocal } from "@/lib/history-merge";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import HistoryItemCard from "./HistoryItemCard";
 import { useRouter } from "next/navigation";
-import { getLocalQuizzes } from "@/lib/localstorage";
-import { normalizeQuizData } from "@/lib/quizLoader";
-import { fetchTypeformStatus, startTypeformConnectFlow } from "./TypeformConnect";
+import { loadQuiz } from "@/lib/quizLoader";
 import PublishToTypeformModal from "./PublishToTypeformModal";
 import { useState } from "react";
-// import { MOCK_HISTORY } from "@/lib/mockHistory";
 
 function SkeletonRow() {
   return (
@@ -111,69 +108,17 @@ export default function HistorySection() {
                     totalQuestions={it.totalQuestions}
                     isLocal={(it as any).isLocal}
                     isPublishing={isPreparingPublish === it.id}
-                    onReview={async () => {
-                      try {
-                        const locals = getLocalQuizzes();
-                        const found = locals.find(q => q.id === it.id);
-                        if (found) {
-                          const normalized = normalizeQuizData({
-                            id: found.id,
-                            title: found.topic,
-                            json: JSON.stringify(found.quiz),
-                            provider: found.provider,
-                            isLocal: true,
-                          });
-                          queryClient.setQueryData(["quiz", it.id], normalized);
-                        } else if (userId) {
-                          const res = await fetch(`/api/quizzes/${it.id}`, { headers: { 'x-user-id': userId } });
-                          if (res.ok) {
-                            const raw = await res.json();
-                            const normalized = normalizeQuizData(raw);
-                            queryClient.setQueryData(["quiz", it.id], normalized);
-                          }
-                        }
-                      } catch {}
-                      router.push(`/quiz/${it.id}`);
-                    }}
+                    onReview={() => router.push(`/quiz/${it.id}`)}
                     onPublish={async () => {
                       setIsPreparingPublish(it.id);
                       try {
-                        const { fetchTypeformStatus, startTypeformConnectFlow } = await import('./TypeformConnect');
-                        let st = await fetchTypeformStatus();
-                        if (!st.connected) {
-                          const res = await startTypeformConnectFlow();
-                          if (!res.connected) { setIsPreparingPublish(null); return; }
-                          st = { connected: true } as any;
-                        }
-                        let normalized: any | undefined;
-                        try {
-                          const locals = getLocalQuizzes();
-                          const found = locals.find(q => q.id === it.id);
-                          if (found) {
-                            normalized = normalizeQuizData({
-                              id: found.id,
-                              title: found.topic,
-                              json: JSON.stringify(found.quiz),
-                              provider: found.provider,
-                              isLocal: true,
-                            });
-                            queryClient.setQueryData(["quiz", it.id], normalized);
-                          }
-                        } catch {}
-                        if (!normalized) {
-                          if (!userId) return;
-                          const res = await fetch(`/api/quizzes/${it.id}`, { headers: { 'x-user-id': userId } });
-                          if (res.ok) {
-                            const raw = await res.json();
-                            normalized = normalizeQuizData(raw);
-                          }
-                        }
-                        if (!normalized) return alert('Could not load quiz to publish');
-                        const minimal = { title: normalized.title, description: normalized.description, questions: normalized.questions };
-                        setPublishData(minimal);
+                        const { ensureTypeformConnected } = await import("./TypeformConnect");
+                        if (!(await ensureTypeformConnected()) || !userId) return;
+                        const quiz = await loadQuiz(it.id, userId);
+                        if (!quiz) return alert("Could not load quiz to publish");
+                        queryClient.setQueryData(["quiz", it.id], quiz);
+                        setPublishData({ title: quiz.title, description: quiz.description, questions: quiz.questions });
                         setPublishOpen(true);
-                      } catch (e) {
-                        alert('Publish failed. Please connect Typeform first.');
                       } finally {
                         setIsPreparingPublish(null);
                       }

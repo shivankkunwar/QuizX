@@ -1,8 +1,5 @@
 'use client'
 import { useUserId } from "@/hooks/useUserId";
-import { createQuiz } from "@/lib/quizService";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { error } from "console";
 import { StepForward } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";

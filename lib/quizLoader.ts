@@ -13,7 +13,7 @@ export interface NormalizedQuiz {
   title: string;
   description?: string;
   questions: NormalizedQuestion[];
-  provider: 'gemini' | 'openrouter';
+  provider: string;
   isLocal?: boolean;
 }
 

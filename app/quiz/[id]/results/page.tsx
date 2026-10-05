@@ -2,9 +2,9 @@
 
 import { useParams, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { getLocalQuizzes } from "@/lib/localstorage";
-import { normalizeQuizData } from "@/lib/quizLoader";
+import { useQueryClient } from "@tanstack/react-query";
+import { useUserId } from "@/hooks/useUserId";
+import { loadQuiz, type NormalizedQuiz } from "@/lib/quizLoader";
 import dynamic from 'next/dynamic';
 const PublishToTypeformModal = dynamic(() => import("@/components/PublishToTypeformModal"), { ssr: false });
 import { useState } from "react";
@@ -13,6 +13,7 @@ export default function ResultsPage() {
   const params = useSearchParams();
   const route = useParams<{ id: string }>();
   const queryClient = useQueryClient();
+  const userId = useUserId();
   const scoreStr = params.get("score") ?? "0";
   const totalStr = params.get("total") ?? "0";
   const score = Number(scoreStr);
@@ -58,31 +59,16 @@ export default function ResultsPage() {
           <button
             onClick={async () => {
               setIsPreparingPublish(true);
-              const { fetchTypeformStatus, startTypeformConnectFlow } = await import("@/components/TypeformConnect");
-              const st = await fetchTypeformStatus();
-              if (!st.connected) {
-                const res = await startTypeformConnectFlow();
-                if (!res.connected) { setIsPreparingPublish(false); return; }
-              }
-              try {
+              const { ensureTypeformConnected } = await import("@/components/TypeformConnect");
+              if (await ensureTypeformConnected()) {
                 const id = String(route?.id || '');
-                let normalized: any | undefined = queryClient.getQueryData(["quiz", id]) as any;
-                if (!normalized) {
-                  try {
-                    const locals = getLocalQuizzes();
-                    const found = locals.find(q => q.id === id);
-                    if (found) {
-                      normalized = normalizeQuizData({ id: found.id, title: found.topic, json: JSON.stringify(found.quiz), provider: found.provider, isLocal: true });
-                      queryClient.setQueryData(["quiz", id], normalized);
-                    }
-                  } catch {}
-                }
-                if (!normalized) { setIsPreparingPublish(false); return alert('Could not load quiz to publish'); }
-                const minimal = { title: normalized.title, description: normalized.description, questions: normalized.questions };
-                setPublishData(minimal);
-                setPublishOpen(true);
-              } catch {}
-              finally { setIsPreparingPublish(false); }
+                const quiz = queryClient.getQueryData<NormalizedQuiz>(["quiz", id]) ?? await loadQuiz(id, userId || "");
+                if (quiz) {
+                  setPublishData({ title: quiz.title, description: quiz.description, questions: quiz.questions });
+                  setPublishOpen(true);
+                } else alert('Could not load quiz to publish');
+              }
+              setIsPreparingPublish(false);
             }}
             disabled={isPreparingPublish}
             className="px-4 py-2 rounded-lg border border-stone-200 bg-white text-stone-800 text-sm font-semibold hover:bg-stone-50 disabled:opacity-60 disabled:cursor-not-allowed"

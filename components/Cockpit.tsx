@@ -54,25 +54,9 @@ export default function Cockpit({ initialTopic }: { initialTopic: string }) {
   const startMutation = useMutation({
     mutationFn: createQuiz,
     onSuccess: (data) => {
-      // Ensure React Query cache holds the normalized shape QuizScreen expects BEFORE navigation
-      try {
-        if ((data as any)?.quiz) {
-          const normalized = normalizeQuizData({
-            id: (data as any).id,
-            title: (data as any).quiz?.title,
-            json: JSON.stringify((data as any).quiz),
-            provider: (data as any).provider,
-            isLocal: true,
-          });
-          queryClient.setQueryData(["quiz", (data as any).id], normalized);
-        } else {
-          queryClient.setQueryData(["quiz", (data as any).id], data);
-        }
-      } catch {}
-      // Usage changes after starting a quiz; ensure counters refresh
-      try {
-        queryClient.invalidateQueries({ queryKey: ['usage', userId] });
-      } catch {}
+      // Seed the cache with the normalized shape QuizScreen expects BEFORE navigation
+      queryClient.setQueryData(["quiz", data.id], normalizeQuizData({ ...data, title: data.quiz?.title, json: data.quiz, isLocal: data.isLocal }));
+      queryClient.invalidateQueries({ queryKey: ["usage", userId] });
       router.push(`/quiz/${data.id}`);
     },
     onError: (err: any) => {
@@ -94,7 +78,7 @@ export default function Cockpit({ initialTopic }: { initialTopic: string }) {
   };
 
   const hitDailyLimit = !isBYOK && usage && usage.quiz.remaining <= 0;
-  const disableNav = !userId || isLoading || startMutation.isPending || hitDailyLimit;
+  const busy = !userId || isLoading || startMutation.isPending || hitDailyLimit;
 
   return (
     <div className="min-h-screen bg-transparent">
@@ -200,8 +184,8 @@ export default function Cockpit({ initialTopic }: { initialTopic: string }) {
         <div className="flex items-center justify-between">
           <button
             type="button"
-            onClick={() => { if (disableNav) return; router.push("/#hero-section"); }}
-            disabled={disableNav}
+            onClick={() => { if (busy) return; router.push("/#hero-section"); }}
+            disabled={busy}
             className="text-sm text-stone-700 hover:underline disabled:opacity-40 disabled:pointer-events-none"
           >
             Back
@@ -220,9 +204,7 @@ export default function Cockpit({ initialTopic }: { initialTopic: string }) {
                 openModal();
                 return;
               }
-              if (!userId || !topicNorm || isLoading || startMutation.isPending || hitDailyLimit) {
-                return;
-              }
+              if (busy || !topicNorm) return;
               startMutation.mutate({
                 topic: refinedTopic,
                 difficulty,
@@ -230,7 +212,7 @@ export default function Cockpit({ initialTopic }: { initialTopic: string }) {
                 geminiKey: isBYOK ? byokKey.trim() : undefined,
               });
             }}
-            disabled={!userId || !topicNorm || isLoading || startMutation.isPending || hitDailyLimit}
+            disabled={busy || !topicNorm}
             className="px-5 py-2 rounded-lg border border-orange-200 bg-white text-stone-800 text-sm font-semibold hover:bg-orange-50 disabled:opacity-50 disabled:pointer-events-none"
           >
             {hitDailyLimit ? "Limit reached" : isLoading ? "Analyzing…" : startMutation.isPending ? "Starting…" : "Start Quiz"}

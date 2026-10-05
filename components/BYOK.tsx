@@ -91,7 +91,7 @@ function BYOKModal({
           <div className="px-5 pb-5">
             <input
               type="password"
-              placeholder="sk-..."
+              placeholder="AIza..."
               value={key}
               onChange={(e) => setKey(e.target.value)}
               className="w-full rounded-lg border border-orange-200 bg-white/80 px-4 py-3 text-stone-800 placeholder-stone-400 focus:outline-none focus:ring-2 focus:ring-orange-300"

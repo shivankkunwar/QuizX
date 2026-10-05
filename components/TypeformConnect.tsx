@@ -50,6 +50,10 @@ export async function startTypeformConnectFlow(): Promise<{ connected: boolean; 
   });
 }
 
+export async function ensureTypeformConnected() {
+  return (await fetchTypeformStatus()).connected || (await startTypeformConnectFlow()).connected;
+}
+
 export async function createTypeformFromQuiz(quiz: any, opts?: { includeEmailField?: boolean }) {
   const base = getTypeformWorkerBase();
   if (!base) throw new Error('Typeform service not configured');

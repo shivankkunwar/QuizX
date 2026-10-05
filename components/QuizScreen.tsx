@@ -149,20 +149,12 @@ export default function QuizScreen({ quizId }: QuizScreenProps) {
             <button
               onClick={async () => {
                 setIsPreparingPublish(true);
-                const { fetchTypeformStatus, startTypeformConnectFlow } = await import('./TypeformConnect');
-                let st = await fetchTypeformStatus();
-                if (!st.connected) {
-                  const res = await startTypeformConnectFlow();
-                  if (!res.connected) { setIsPreparingPublish(false); return; }
-                  st = { connected: true } as any;
-                }
-                try {
-                  if (!quiz) { setIsPreparingPublish(false); return; }
-                  const minimal = { title: quiz.title, description: quiz.description, questions: quiz.questions };
-                  setPublishData(minimal);
+                const { ensureTypeformConnected } = await import('./TypeformConnect');
+                if (await ensureTypeformConnected()) {
+                  setPublishData({ title: quiz.title, description: quiz.description, questions: quiz.questions });
                   setPublishOpen(true);
-                } catch {}
-                finally { setIsPreparingPublish(false); }
+                }
+                setIsPreparingPublish(false);
               }}
               disabled={isPreparingPublish}
               aria-label="Publish"
