@@ -10,8 +10,8 @@ export default function HistoryItem({
   isPublishing
 }: {
   topic: string;
-  score?: number;
-  totalQuestions?: number;
+  score?: number | null;
+  totalQuestions?: number | null;
   onReview?: () => void;
   onPublish?: () => void;
   isLocal?: boolean;
@@ -27,7 +27,7 @@ export default function HistoryItem({
 
       <div className="flex-grow">
         <p className="font-medium text-sm text-stone-700">{topic}</p>
-        {score !== undefined && totalQuestions !== undefined ? (
+        {score != null && totalQuestions != null ? (
           <p className="text-sm text-stone-500">
             {score}/{totalQuestions} correct
           </p>

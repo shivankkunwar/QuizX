@@ -18,8 +18,8 @@ export interface HistoryItem {
   topic: string;
   provider: string;
   created_at: number;
-  score?: number;
-  totalQuestions?: number;
+  score?: number | null;
+  totalQuestions?: number | null;
 }
 
 export type UsageResponse = {
