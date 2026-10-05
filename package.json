@@ -6,7 +6,8 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "smoke": "node tests/smoke.mjs"
   },
   "dependencies": {
     "@tanstack/react-query": "^5.84.1",
@@ -26,6 +27,7 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "playwright-core": "^1.63.0",
     "tailwindcss": "^4",
     "typescript": "^5"
   }

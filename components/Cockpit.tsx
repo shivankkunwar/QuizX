@@ -84,7 +84,7 @@ export default function Cockpit({ initialTopic }: { initialTopic: string }) {
     <div className="min-h-screen bg-transparent">
       <div className="max-w-2xl mx-auto px-4 py-8">
         <header className="mb-6">
-          <h1 className="text-2xl font-semibold text-stone-800 truncate">{topicNorm || "Untitled Topic"}</h1>
+          <h1 className="text-2xl font-semibold text-stone-800 truncate pr-24 md:pr-0">{topicNorm || "Untitled Topic"}</h1>
           <p className="text-xs text-stone-500 mt-1">Fine‑tune your quiz for better focus.</p>
           {/* Minimal usage moved near Start button */}
         </header>

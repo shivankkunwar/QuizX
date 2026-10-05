@@ -112,7 +112,7 @@ export default function QuizScreen({ quizId }: QuizScreenProps) {
             >
               <ArrowLeft className="w-5 h-5 text-stone-600" />
             </button>
-            <div className="flex-1">
+            <div className="flex-1 min-w-0">
               <h1 className="font-semibold text-stone-800 truncate">{quiz.title}</h1>
               <p className="text-sm text-stone-500">Question {currentQuestionIndex + 1} of {safeQuestions.length}</p>
             </div>
